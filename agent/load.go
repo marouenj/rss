@@ -1,4 +1,4 @@
-package rss
+package agent
 
 import (
 	"container/list"
