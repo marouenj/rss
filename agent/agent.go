@@ -7,6 +7,7 @@ type Load interface {
 }
 
 type Crawl interface {
+	Crawl(loader *Loader) error
 }
 
 type Save interface {
