@@ -12,7 +12,7 @@ import (
 )
 
 type Loader struct {
-	urls []string
+	Urls []string
 }
 
 func NewLoader() (*Loader, error) {
@@ -74,15 +74,15 @@ func (l *Loader) Load(file string) error {
 		}
 	}
 
-	l.urls = make([]string, urls.Len())
+	l.Urls = make([]string, urls.Len())
 	idx := -1
 	for e := urls.Front(); e != nil; e = e.Next() {
 		url, _ := e.Value.(string)
 		idx++
-		l.urls[idx] = url
+		l.Urls[idx] = url
 	}
 
-	sort.Strings(l.urls)
+	sort.Strings(l.Urls)
 
 	return nil
 }

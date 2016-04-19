@@ -83,7 +83,7 @@ func Test_Load(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		urls := loader.urls
+		urls := loader.Urls
 
 		// check length
 		if len(urls) != c.length {
