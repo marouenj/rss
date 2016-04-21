@@ -4,10 +4,91 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
 )
+
+func Test_unmarshal(t *testing.T) {
+	testCases := []struct {
+		json   string
+		groups ChannelGroups
+	}{
+		{
+			`
+			[
+				{
+					"owner": "wsj",
+					"channels": ["http://www.wsj.com/xml/rss/3_7085.xml", "http://www.wsj.com/xml/rss/3_7014.xml"]
+				}
+			]
+			`,
+			ChannelGroups{
+				ChannelGroup{
+					Owner: "wsj",
+					Channels: []string{
+						"http://www.wsj.com/xml/rss/3_7085.xml",
+						"http://www.wsj.com/xml/rss/3_7014.xml",
+					},
+				},
+			},
+		},
+		{
+			`
+			[
+				{
+					"owner": "wsj",
+					"channels": ["http://www.wsj.com/xml/rss/3_7085.xml", "http://www.wsj.com/xml/rss/3_7014.xml"]
+				},
+				{
+					"owner": "cnet",
+					"channels": ["http://www.cnet.com/rss/iphone-update/", "http://www.cnet.com/rss/android-update/"]
+				}
+			]
+			`,
+			ChannelGroups{
+				ChannelGroup{
+					Owner: "wsj",
+					Channels: []string{
+						"http://www.wsj.com/xml/rss/3_7085.xml",
+						"http://www.wsj.com/xml/rss/3_7014.xml",
+					},
+				},
+				ChannelGroup{
+					Owner: "cnet",
+					Channels: []string{
+						"http://www.cnet.com/rss/iphone-update/",
+						"http://www.cnet.com/rss/android-update/",
+					},
+				},
+			},
+		},
+	}
+
+	for idx, testCase := range testCases {
+		// create temp dir
+		dir, err := ioutil.TempDir("", "dir")
+		if err != nil {
+			t.Error(err)
+		}
+
+		// write json load to temp file
+		file := filepath.Join(dir, "file")
+		err = ioutil.WriteFile(file, []byte(testCase.json), 0666)
+		if err != nil {
+			t.Error(err)
+		}
+
+		groups, err := unmarshal(dir, "file")
+
+		if !reflect.DeepEqual(groups, testCase.groups) {
+			t.Errorf("[Test case %d], expected %+v, got %+v", idx, testCase.groups, groups)
+		}
+
+		os.RemoveAll(dir)
+	}
+}
 
 func Test_forEachFile(t *testing.T) {
 	cases := []struct {

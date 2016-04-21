@@ -11,6 +11,13 @@ import (
 	"strings"
 )
 
+type ChannelGroup struct {
+	Owner    string   `json:"owner"`
+	Channels []string `json:"channels"`
+}
+
+type ChannelGroups []ChannelGroup
+
 type Loader struct {
 	Urls []string
 }
@@ -85,6 +92,22 @@ func (l *Loader) Load(file string) error {
 	sort.Strings(l.Urls)
 
 	return nil
+}
+
+func unmarshal(prefix string, name string) (ChannelGroups, error) {
+	in := filepath.Join(prefix, name)
+	file, err := ioutil.ReadFile(in)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading '%s': %s", in, err)
+	}
+
+	var channelGroups ChannelGroups
+	err = json.Unmarshal(file, &channelGroups)
+	if err != nil {
+		return nil, fmt.Errorf("Error decoding '%s': %s", in, err)
+	}
+
+	return channelGroups, nil
 }
 
 func forEachFile(prefix string, name string) (*list.List, error) {
