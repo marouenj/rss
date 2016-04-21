@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// represent a group of channels grouped by their common owner
 type ChannelGroup struct {
 	Owner    string   `json:"owner"`
 	Channels []string `json:"channels"`
@@ -21,6 +22,7 @@ type ChannelGroups []ChannelGroup
 // load a json file into a ChannelGroups
 func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 	path := filepath.Join(dir, fname)
+
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading '%s': %s", path, err)
