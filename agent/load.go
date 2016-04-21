@@ -19,6 +19,17 @@ type ChannelGroup struct {
 
 type ChannelGroups []ChannelGroup
 
+// implement the sort interface for ChannelGroups
+func (cg ChannelGroups) Len() int {
+	return len(cg)
+}
+func (cg ChannelGroups) Less(i, j int) bool {
+	return strings.Compare(cg[i].Owner, cg[j].Owner) < 0
+}
+func (cg ChannelGroups) Swap(i, j int) {
+	cg[i], cg[j] = cg[j], cg[i]
+}
+
 // load a json file into a ChannelGroups
 func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 	path := filepath.Join(dir, fname)
@@ -33,6 +44,8 @@ func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Error decoding '%s': %s", path, err)
 	}
+
+	sort.Sort(channelGroups)
 
 	return &channelGroups, nil
 }

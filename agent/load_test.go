@@ -49,17 +49,17 @@ func Test_NewChannelGroups(t *testing.T) {
 			`,
 			ChannelGroups{
 				ChannelGroup{
-					Owner: "wsj",
-					Channels: []string{
-						"http://www.wsj.com/xml/rss/3_7085.xml",
-						"http://www.wsj.com/xml/rss/3_7014.xml",
-					},
-				},
-				ChannelGroup{
 					Owner: "cnet",
 					Channels: []string{
 						"http://www.cnet.com/rss/iphone-update/",
 						"http://www.cnet.com/rss/android-update/",
+					},
+				},
+				ChannelGroup{
+					Owner: "wsj",
+					Channels: []string{
+						"http://www.wsj.com/xml/rss/3_7085.xml",
+						"http://www.wsj.com/xml/rss/3_7014.xml",
 					},
 				},
 			},
