@@ -122,7 +122,7 @@ func forEachFile(prefix string, name string) (*list.List, error) {
 	var entries []string
 	err = json.Unmarshal(file, &entries)
 	if err != nil {
-		fmt.Errorf("Error decoding '%s': %s", in, err)
+		return nil, fmt.Errorf("Error decoding '%s': %s", in, err)
 	}
 
 	for _, url := range entries {
