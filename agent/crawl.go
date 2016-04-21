@@ -14,6 +14,7 @@ type Item struct {
 	Title string `xml:"title"`
 	Link  string `xml:"link"`
 	Desc  string `xml:"description"`
+	Date  string `xml:"pubDate"`
 }
 
 func (i *Item) setTitle(newTitle string) {
@@ -26,6 +27,10 @@ func (i *Item) setLink(newLink string) {
 
 func (i *Item) setDesc(newDesc string) {
 	i.Desc = newDesc
+}
+
+func (i *Item) setDate(newDate string) {
+	i.Date = newDate
 }
 
 // Channel models a 'channel' in an RSS feed
@@ -106,6 +111,7 @@ func (c *Crawler) clean() error {
 			item.setTitle(strings.TrimSpace(item.Title))
 			item.setLink(strings.TrimSpace(item.Link))
 			item.setDesc(strings.TrimSpace(item.Desc))
+			item.setDate(strings.TrimSpace(item.Date))
 		}
 	}
 
