@@ -48,12 +48,12 @@ func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 	// sort by owner
 	sort.Sort(channelGroups)
 
-	merge(&channelGroups)
+	(&channelGroups).merge()
 
 	return &channelGroups, nil
 }
 
-func merge(cg *ChannelGroups) error {
+func (cg *ChannelGroups) merge() error {
 	// group by owner
 	curr := 0
 	for idx, _ := range (*cg)[1:] {
