@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"container/list"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -45,16 +44,11 @@ func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 		return nil, fmt.Errorf("Error decoding '%s': %s", path, err)
 	}
 
-	// sort by owner
-	sort.Sort(channelGroups)
-
-	(&channelGroups).merge()
-
 	return &channelGroups, nil
 }
 
+// group by owner
 func (cg *ChannelGroups) merge() error {
-	// group by owner
 	curr := 0
 	for idx, _ := range (*cg)[1:] {
 		if strings.Compare((*cg)[curr].Owner, (*cg)[idx+1].Owner) == 0 { // merge
@@ -65,6 +59,7 @@ func (cg *ChannelGroups) merge() error {
 		}
 	}
 
+	// resize
 	t := *cg
 	*cg = make(ChannelGroups, curr+1)
 	copy(*cg, t)
@@ -72,8 +67,9 @@ func (cg *ChannelGroups) merge() error {
 	return nil
 }
 
+// the agent responsible for loading and managing the links to the rss resources
 type Loader struct {
-	Urls []string
+	ChannelGroups ChannelGroups
 }
 
 func NewLoader() (*Loader, error) {
@@ -96,15 +92,13 @@ func (l *Loader) Load(file string) error {
 		os.Exit(1)
 	}
 
-	urls := list.New()
-
 	if !fi.IsDir() { // is a file
-		l, err := forEachFile("", file)
+		groups, err := NewChannelGroups("", file)
 		if err != nil {
 			fmt.Printf("Error reading '%s': %s\n", file, err)
 			os.Exit(1)
 		}
-		urls.PushBackList(l)
+		l.ChannelGroups = *groups
 	} else { // is a dir
 		contents, err := f.Readdir(-1)
 		if err != nil {
@@ -126,48 +120,24 @@ func (l *Loader) Load(file string) error {
 				continue
 			}
 
-			l, err := forEachFile(file, fi.Name())
+			groups, err := NewChannelGroups(file, fi.Name())
 			if err != nil {
 				fmt.Printf("Error reading '%s': %s\n", fi.Name(), err)
 				os.Exit(1)
 			}
-			urls.PushBackList(l)
+			l.ChannelGroups = append(l.ChannelGroups, *groups...)
 		}
 	}
 
-	l.Urls = make([]string, urls.Len())
-	idx := -1
-	for e := urls.Front(); e != nil; e = e.Next() {
-		url, _ := e.Value.(string)
-		idx++
-		l.Urls[idx] = url
-	}
+	// sort by owner
+	sort.Sort(l.ChannelGroups)
+	l.ChannelGroups.merge()
 
-	sort.Strings(l.Urls)
+	for _, ChannelGroup := range l.ChannelGroups {
+		sort.Strings(ChannelGroup.Channels)
+	}
 
 	return nil
-}
-
-func forEachFile(prefix string, name string) (*list.List, error) {
-	urls := list.New()
-
-	in := filepath.Join(prefix, name)
-	file, err := ioutil.ReadFile(in)
-	if err != nil {
-		return nil, fmt.Errorf("Error reading '%s': %s", in, err)
-	}
-
-	var entries []string
-	err = json.Unmarshal(file, &entries)
-	if err != nil {
-		return nil, fmt.Errorf("Error decoding '%s': %s", in, err)
-	}
-
-	for _, url := range entries {
-		urls.PushBack(url)
-	}
-
-	return urls, nil
 }
 
 type dirEntries []os.FileInfo
@@ -176,11 +146,9 @@ type dirEntries []os.FileInfo
 func (d dirEntries) Len() int {
 	return len(d)
 }
-
 func (d dirEntries) Less(i, j int) bool {
 	return d[i].Name() < d[j].Name()
 }
-
 func (d dirEntries) Swap(i, j int) {
 	d[i], d[j] = d[j], d[i]
 }
