@@ -19,7 +19,7 @@ type ChannelGroup struct {
 type ChannelGroups []ChannelGroup
 
 // load a json file into a ChannelGroups
-func unmarshal(prefix string, name string) (ChannelGroups, error) {
+func NewChannelGroups(prefix string, name string) (*ChannelGroups, error) {
 	in := filepath.Join(prefix, name)
 	file, err := ioutil.ReadFile(in)
 	if err != nil {
@@ -32,7 +32,7 @@ func unmarshal(prefix string, name string) (ChannelGroups, error) {
 		return nil, fmt.Errorf("Error decoding '%s': %s", in, err)
 	}
 
-	return channelGroups, nil
+	return &channelGroups, nil
 }
 
 type Loader struct {

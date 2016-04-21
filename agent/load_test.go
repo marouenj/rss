@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func Test_unmarshal(t *testing.T) {
+func Test_NewChannelGroups(t *testing.T) {
 	testCases := []struct {
 		json   string
 		groups ChannelGroups
@@ -80,9 +80,9 @@ func Test_unmarshal(t *testing.T) {
 			t.Error(err)
 		}
 
-		groups, err := unmarshal(dir, "file")
+		groups, err := NewChannelGroups(dir, "file")
 
-		if !reflect.DeepEqual(groups, testCase.groups) {
+		if !reflect.DeepEqual(*groups, testCase.groups) {
 			t.Errorf("[Test case %d], expected %+v, got %+v", idx, testCase.groups, groups)
 		}
 
