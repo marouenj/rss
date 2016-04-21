@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
 )
 
 func Test_RssUnmarshal(t *testing.T) {
@@ -69,6 +71,77 @@ func Test_RssUnmarshal(t *testing.T) {
 		if !reflect.DeepEqual(root, testCase.out) {
 			t.Errorf("[Input: %v], expected %v, got %v", testCase.in, testCase.out, root)
 		}
+	}
+}
+
+func Test_ParseDate(t *testing.T) {
+	testCases := []struct {
+		example string // in
+		input   string
+		tz      string
+		year    int // out
+		month   time.Month
+		day     int
+		hour    int
+		min     int
+		sec     int
+	}{
+		{ // test case 0, names time zone
+			time.RFC1123,
+			"Tue, 19 Apr 2016 20:20:01 EDT",
+			"EDT",
+			2016,
+			4,
+			19,
+			20,
+			20,
+			1,
+		},
+		{ // test case 1, numeric time zone
+			time.RFC1123Z,
+			"Tue, 19 Apr 2016 17:25:18 +0000",
+			"",
+			2016,
+			4,
+			19,
+			17,
+			25,
+			18,
+		},
+		{ // test case 2, numeric time zone with +offset
+			time.RFC1123Z,
+			"Tue, 19 Apr 2016 17:25:18 +0100",
+			"",
+			2016,
+			4,
+			19,
+			17,
+			25,
+			18,
+		},
+	}
+
+	for idx, testCase := range testCases {
+		var parsed time.Time
+		var err error
+		if strings.Compare(testCase.tz, "") == 0 {
+			parsed, err = time.Parse(testCase.example, testCase.input)
+		} else {
+			loc, _ := time.LoadLocation(Tz[testCase.tz])
+			parsed, err = time.ParseInLocation(testCase.example, testCase.input, loc)
+		}
+		if err != nil {
+			t.Error(err)
+		}
+
+		year, month, day := parsed.Date()
+		hour, min, sec := parsed.Clock()
+		if year != testCase.year || month != testCase.month || day != testCase.day || hour != testCase.hour || min != testCase.min || sec != testCase.sec {
+			t.Errorf("[Test case %d] expecting (year, month, day, hour, min, sec) as (%d, %d, %d, %d, %d, %d), got (%d, %d, %d, %d, %d, %d)", idx, year, month, day, hour, min, sec, testCase.year, testCase.month, testCase.day, testCase.hour, testCase.min, testCase.sec)
+		}
+
+		// t.Error(parsed)
+		t.Errorf("%v @@@ %v", parsed, parsed.In(time.UTC))
 	}
 }
 
