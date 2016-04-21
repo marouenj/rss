@@ -45,9 +45,31 @@ func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 		return nil, fmt.Errorf("Error decoding '%s': %s", path, err)
 	}
 
+	// sort by owner
 	sort.Sort(channelGroups)
 
+	merge(&channelGroups)
+
 	return &channelGroups, nil
+}
+
+func merge(cg *ChannelGroups) error {
+	// group by owner
+	curr := 0
+	for idx, _ := range (*cg)[1:] {
+		if strings.Compare((*cg)[curr].Owner, (*cg)[idx+1].Owner) == 0 { // merge
+			(*cg)[curr].Channels = append((*cg)[curr].Channels, (*cg)[idx+1].Channels...)
+		} else {
+			curr++
+			(*cg)[curr] = (*cg)[idx+1]
+		}
+	}
+
+	t := *cg
+	*cg = make(ChannelGroups, curr+1)
+	copy(*cg, t)
+
+	return nil
 }
 
 type Loader struct {
