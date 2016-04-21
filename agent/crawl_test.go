@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// check we're correcly parsing xml
 func Test_RssUnmarshal(t *testing.T) {
 	testCases := []struct {
 		in  string
@@ -74,6 +75,7 @@ func Test_RssUnmarshal(t *testing.T) {
 	}
 }
 
+// check we're correctly parsing date
 func Test_ParseDate(t *testing.T) {
 	testCases := []struct {
 		example string // in
