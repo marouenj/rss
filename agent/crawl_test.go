@@ -572,6 +572,7 @@ func Test_Crawl(t *testing.T) {
 
 // Smoke test
 func Test_Crawl_(t *testing.T) {
+	t.Skip()
 	testCases := []struct {
 		urls []string
 	}{
