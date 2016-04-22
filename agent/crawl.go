@@ -67,26 +67,28 @@ func (c *Crawler) Crawl(loader *Loader) error {
 		return nil
 	}
 
-	if loader.Urls == nil {
+	if loader.ChannelGroups == nil {
 		return nil
 	}
 
-	for _, url := range loader.Urls {
-		resp, err := http.Get(url)
-		if err != nil {
-			fmt.Printf("[ERR] Unable to GET %v: %v", url, err)
-			continue
-		}
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+	for _, group := range loader.ChannelGroups {
+		for _, url := range group.Channels {
+			resp, err := http.Get(url)
+			if err != nil {
+				fmt.Printf("[ERR] Unable to GET %v: %v", url, err)
+				continue
+			}
+			defer resp.Body.Close()
+			body, err := ioutil.ReadAll(resp.Body)
 
-		var rss Rss
-		err = xml.Unmarshal(body, &rss)
-		if err != nil {
-			fmt.Printf("[ERR] Unable to unmarshal %v: %v", string(body[:]), err)
-		}
+			var rss Rss
+			err = xml.Unmarshal(body, &rss)
+			if err != nil {
+				fmt.Printf("[ERR] Unable to unmarshal %v: %v", string(body[:]), err)
+			}
 
-		c.merge(rss.Channels)
+			c.merge(rss.Channels)
+		}
 	}
 
 	c.clean()

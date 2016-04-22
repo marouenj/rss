@@ -484,9 +484,15 @@ func Test_Crawl(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		loader.Urls = make([]string, len(testCase.bodies))
-		for idx, _ := range loader.Urls {
-			loader.Urls[idx] = ts.URL
+
+		loader.ChannelGroups = ChannelGroups{
+			ChannelGroup{
+				Owner:    "any",
+				Channels: make([]string, len(testCase.bodies)),
+			},
+		}
+		for idx, _ := range testCase.bodies {
+			loader.ChannelGroups[0].Channels[idx] = ts.URL
 		}
 
 		crawler, err := NewCrawler()
@@ -518,7 +524,14 @@ func Test_Crawl_(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		loader.Urls = testCase.urls
+
+		loader.ChannelGroups = ChannelGroups{
+			ChannelGroup{
+				Owner:    "any",
+				Channels: testCase.urls,
+			},
+		}
+		// loader.Urls = testCase.urls
 
 		crawler, err := NewCrawler()
 		if err != nil {
