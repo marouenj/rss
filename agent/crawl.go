@@ -17,35 +17,11 @@ type Item struct {
 	Date  string `xml:"pubDate"`
 }
 
-func (i *Item) setTitle(newTitle string) {
-	i.Title = newTitle
-}
-
-func (i *Item) setLink(newLink string) {
-	i.Link = newLink
-}
-
-func (i *Item) setDesc(newDesc string) {
-	i.Desc = newDesc
-}
-
-func (i *Item) setDate(newDate string) {
-	i.Date = newDate
-}
-
 // Channel models a 'channel' in an RSS feed
 type Channel struct {
 	Title string  `xml:"title"`
 	Desc  string  `xml:"description"`
 	Items []*Item `xml:"item"`
-}
-
-func (c *Channel) setTitle(newTitle string) {
-	c.Title = newTitle
-}
-
-func (c *Channel) setDesc(newDesc string) {
-	c.Desc = newDesc
 }
 
 // Rss represents an RSS document
@@ -109,13 +85,13 @@ func (c *Crawler) merge(channels []*Channel) error {
 
 func (c *Crawler) clean() error {
 	for _, channel := range c.Rss.Channels {
-		channel.setTitle(strings.TrimSpace(channel.Title))
-		channel.setDesc(strings.TrimSpace(channel.Desc))
+		channel.Title = strings.TrimSpace(channel.Title)
+		channel.Desc = strings.TrimSpace(channel.Desc)
 		for _, item := range channel.Items {
-			item.setTitle(strings.TrimSpace(item.Title))
-			item.setLink(strings.TrimSpace(item.Link))
-			item.setDesc(strings.TrimSpace(item.Desc))
-			item.setDate(strings.TrimSpace(item.Date))
+			item.Title = strings.TrimSpace(item.Title)
+			item.Link = strings.TrimSpace(item.Link)
+			item.Desc = strings.TrimSpace(item.Desc)
+			item.Date = strings.TrimSpace(item.Date)
 		}
 	}
 
