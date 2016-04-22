@@ -358,6 +358,107 @@ func Test_Load(t *testing.T) {
 				},
 			},
 		},
+		{ // test case 5, one file, one owner, duplicate links
+			[]string{
+				`
+				[
+					{
+						"owner": "wsj",
+						"channels": ["http://www.wsj.com/xml/rss/3_7085.xml", "http://www.wsj.com/xml/rss/3_7085.xml", "http://www.wsj.com/xml/rss/3_7014.xml", "http://www.wsj.com/xml/rss/3_7085.xml"]
+					}
+				]
+				`,
+			},
+			ChannelGroups{
+				ChannelGroup{
+					Owner: "wsj",
+					Channels: []string{
+						"http://www.wsj.com/xml/rss/3_7014.xml",
+						"http://www.wsj.com/xml/rss/3_7085.xml",
+					},
+				},
+			},
+		},
+		{ // test case 6, one file, multiple owners appearing many times, duplicate links
+			[]string{
+				`
+				[
+					{
+						"owner": "wsj",
+						"channels": ["http://www.wsj.com/xml/rss/3_7085.xml", "http://www.wsj.com/xml/rss/3_7014.xml", "http://www.wsj.com/xml/rss/3_7085.xml"]
+					},
+					{
+						"owner": "cnet",
+						"channels": ["http://www.cnet.com/rss/iphone-update/"]
+					},
+					{
+						"owner": "cnet",
+						"channels": ["http://www.cnet.com/rss/iphone-update/", "http://www.cnet.com/rss/android-update/"]
+					}
+				]
+				`,
+			},
+			ChannelGroups{
+				ChannelGroup{
+					Owner: "cnet",
+					Channels: []string{
+						"http://www.cnet.com/rss/android-update/",
+						"http://www.cnet.com/rss/iphone-update/",
+					},
+				},
+				ChannelGroup{
+					Owner: "wsj",
+					Channels: []string{
+						"http://www.wsj.com/xml/rss/3_7014.xml",
+						"http://www.wsj.com/xml/rss/3_7085.xml",
+					},
+				},
+			},
+		},
+		{ // test case 7, multiple files, multiple owners appearing many times, duplicate links
+			[]string{
+				`
+				[
+					{
+						"owner": "wsj",
+						"channels": ["http://www.wsj.com/xml/rss/3_7085.xml", "http://www.wsj.com/xml/rss/3_7085.xml", "http://www.wsj.com/xml/rss/3_7014.xml"]
+					},
+					{
+						"owner": "cnet",
+						"channels": ["http://www.cnet.com/rss/iphone-update/"]
+					}
+				]
+				`,
+				`
+				[
+					{
+						"owner": "wsj",
+						"channels": ["http://www.wsj.com/xml/rss/3_7014.xml"]
+					},
+					{
+						"owner": "cnet",
+						"channels": ["http://www.cnet.com/rss/android-update/", "http://www.cnet.com/rss/iphone-update/"]
+					}
+				]
+				`,
+			},
+			ChannelGroups{
+				ChannelGroup{
+					Owner: "cnet",
+					Channels: []string{
+						"http://www.cnet.com/rss/android-update/",
+						"http://www.cnet.com/rss/iphone-update/",
+					},
+				},
+				ChannelGroup{
+					Owner: "wsj",
+					Channels: []string{
+						"http://www.wsj.com/xml/rss/3_7014.xml",
+						"http://www.wsj.com/xml/rss/3_7085.xml",
+					},
+				},
+			},
+		},
 	}
 
 	for idx, testCase := range testCases {

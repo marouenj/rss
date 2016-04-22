@@ -48,7 +48,7 @@ func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 }
 
 // group by owner
-func (cg *ChannelGroups) merge() error {
+func (cg *ChannelGroups) mergeOwners() error {
 	curr := 0
 	for idx, _ := range (*cg)[1:] {
 		if strings.Compare((*cg)[curr].Owner, (*cg)[idx+1].Owner) == 0 { // merge
@@ -63,6 +63,26 @@ func (cg *ChannelGroups) merge() error {
 	t := *cg
 	*cg = make(ChannelGroups, curr+1)
 	copy(*cg, t)
+
+	return nil
+}
+
+// remove duplicate links (scope is within same owner)
+func (cg *ChannelGroups) cleanLinks() error {
+	for idxG, _ := range *cg {
+		curr := 0
+		for idx, _ := range (*cg)[idxG].Channels[1:] {
+			if strings.Compare((*cg)[idxG].Channels[curr], (*cg)[idxG].Channels[idx+1]) != 0 {
+				curr++
+				(*cg)[idxG].Channels[curr] = (*cg)[idxG].Channels[idx+1]
+			}
+		}
+
+		// resize
+		t := (*cg)[idxG].Channels
+		(*cg)[idxG].Channels = make([]string, curr+1)
+		copy((*cg)[idxG].Channels, t)
+	}
 
 	return nil
 }
@@ -127,12 +147,19 @@ func (l *Loader) Load(file string) error {
 	// sort owners
 	sort.Sort(l.ChannelGroups)
 
-	// owners listed more than once have their content merged together
-	l.ChannelGroups.merge()
+	// similar entries (entries of the same owner) are merged into one entry
+	if err := l.ChannelGroups.mergeOwners(); err != nil {
+		return fmt.Errorf("[ERR] Unable to merge owners: %v", err)
+	}
 
 	// sort channels
 	for _, ChannelGroup := range l.ChannelGroups {
 		sort.Strings(ChannelGroup.Channels)
+	}
+
+	// clean links
+	if err := l.ChannelGroups.cleanLinks(); err != nil {
+		return fmt.Errorf("[ERR] Unable to clean links: %v", err)
 	}
 
 	return nil
