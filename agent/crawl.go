@@ -17,18 +17,22 @@ type Item struct {
 	Date  string `xml:"pubDate"     json:"-"`
 }
 
+type Items []*Item
+
 // Channel models a 'channel' in an RSS feed
 type Channel struct {
-	Owner string  `xml:"-"           json:"-"`
-	Title string  `xml:"title"       json:"title"`
-	Desc  string  `xml:"description" json:"desc"`
-	Items []*Item `xml:"item"        json:"items"`
+	Owner string `xml:"-"           json:"-"`
+	Title string `xml:"title"       json:"title"`
+	Desc  string `xml:"description" json:"desc"`
+	Items *Items `xml:"item"        json:"items"`
 }
+
+type Channels []*Channel
 
 // Rss represents an RSS document
 type Rss struct {
-	XMLName  xml.Name   `xml:"rss"`
-	Channels []*Channel `xml:"channel"`
+	XMLName  xml.Name `xml:"rss"`
+	Channels Channels `xml:"channel"`
 }
 
 type Crawler struct {
@@ -92,7 +96,7 @@ func (c *Crawler) clean() error {
 	for _, channel := range c.Rss.Channels {
 		channel.Title = strings.TrimSpace(channel.Title)
 		channel.Desc = strings.TrimSpace(channel.Desc)
-		for _, item := range channel.Items {
+		for _, item := range *channel.Items {
 			item.Title = strings.TrimSpace(item.Title)
 			item.Link = strings.TrimSpace(item.Link)
 			item.Desc = strings.TrimSpace(item.Desc)
@@ -108,7 +112,7 @@ func (c *Crawler) print() string {
 	for _, channel := range c.Rss.Channels {
 		s = strings.Join([]string{s, fmt.Sprintf("Title: @%s@\n", channel.Title)}, "")
 		s = strings.Join([]string{s, fmt.Sprintf("Desc:  @%s@\n", channel.Desc)}, "")
-		for idx, item := range channel.Items {
+		for idx, item := range *channel.Items {
 			s = strings.Join([]string{s, fmt.Sprintf("\t%2d Title: @%s@\n", idx, item.Title)}, "")
 			s = strings.Join([]string{s, fmt.Sprintf("\t%2d Link:  @%s@\n", idx, item.Link)}, "")
 			s = strings.Join([]string{s, fmt.Sprintf("\t%2d Desc:  @%s@\n", idx, item.Desc)}, "")

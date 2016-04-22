@@ -38,7 +38,7 @@ func Test_RssUnmarshal(t *testing.T) {
 					&Channel{
 						Title: "CNET iPhone Update",
 						Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "Apple iPhone SE owners bemoan audio bug - CNET",
 								Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
@@ -63,7 +63,7 @@ func Test_RssUnmarshal(t *testing.T) {
 			t.Errorf("[Input: %v], expected %v, got %v", testCase.in, len(testCase.out.Channels), len(root.Channels))
 		}
 
-		if len(root.Channels[0].Items) != len(testCase.out.Channels[0].Items) {
+		if len(*root.Channels[0].Items) != len(*testCase.out.Channels[0].Items) {
 			t.Errorf("[Input: %v], expected %v, got %v", testCase.in, len(testCase.out.Channels), len(root.Channels))
 		}
 
@@ -89,7 +89,7 @@ func Test_merge(t *testing.T) {
 					&Channel{
 						Title: "CNET iPhone Update",
 						Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "Apple iPhone SE owners bemoan audio bug - CNET",
 								Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
@@ -108,7 +108,7 @@ func Test_merge(t *testing.T) {
 					&Channel{
 						Title: "WSJ.com: World News",
 						Desc:  "World News",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "Death Toll Rises Following Ecuador Earthquake",
 								Link:  "http://www.wsj.com/articles/death-toll-in-ecuador-earthquake-climbs-as-correa-tours-ravaged-areas-1460993084?mod=fox_australian",
@@ -127,7 +127,7 @@ func Test_merge(t *testing.T) {
 					&Channel{
 						Title: "WSJ.com: World News",
 						Desc:  "World News",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "Death Toll Rises Following Ecuador Earthquake",
 								Link:  "http://www.wsj.com/articles/death-toll-in-ecuador-earthquake-climbs-as-correa-tours-ravaged-areas-1460993084?mod=fox_australian",
@@ -138,7 +138,7 @@ func Test_merge(t *testing.T) {
 					&Channel{
 						Title: "CNET iPhone Update",
 						Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "Apple iPhone SE owners bemoan audio bug - CNET",
 								Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
@@ -167,7 +167,7 @@ func Test_merge(t *testing.T) {
 					&Channel{
 						Title: "WSJ.com: World News",
 						Desc:  "World News",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "Death Toll Rises Following Ecuador Earthquake",
 								Link:  "http://www.wsj.com/articles/death-toll-in-ecuador-earthquake-climbs-as-correa-tours-ravaged-areas-1460993084?mod=fox_australian",
@@ -186,7 +186,7 @@ func Test_merge(t *testing.T) {
 					&Channel{
 						Title: "WSJ.com: World News",
 						Desc:  "World News",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "Death Toll Rises Following Ecuador Earthquake",
 								Link:  "http://www.wsj.com/articles/death-toll-in-ecuador-earthquake-climbs-as-correa-tours-ravaged-areas-1460993084?mod=fox_australian",
@@ -290,7 +290,7 @@ func Test_Crawl(t *testing.T) {
 						Owner: owner,
 						Title: "WSJ.com: World News",
 						Desc:  "World News",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "Obama's Mideast Mission: Get Saudis, Iran to Make Nice",
 								Link:  "http://www.wsj.com/articles/obamas-mideast-mission-get-saudis-iran-to-make-nice-1461111595?mod=fox_australian",
@@ -429,7 +429,7 @@ func Test_Crawl(t *testing.T) {
 						Owner: owner,
 						Title: "WSJ.com: World News",
 						Desc:  "World News",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "Obama's Mideast Mission: Get Saudis, Iran to Make Nice",
 								Link:  "http://www.wsj.com/articles/obamas-mideast-mission-get-saudis-iran-to-make-nice-1461111595?mod=fox_australian",
@@ -448,7 +448,7 @@ func Test_Crawl(t *testing.T) {
 						Owner: owner,
 						Title: "CNET iPhone Update",
 						Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
-						Items: []*Item{
+						Items: &Items{
 							&Item{
 								Title: "9 settings every new iPhone owner should change - CNET",
 								Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
