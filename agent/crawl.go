@@ -64,11 +64,11 @@ func NewCrawler() (*Crawler, error) {
 
 func (c *Crawler) Crawl(loader *Loader) error {
 	if loader == nil {
-		return nil
+		return errors.New(fmt.Sprintf("[ERR] Loader is null"))
 	}
 
 	if loader.ChannelGroups == nil {
-		return nil
+		return errors.New(fmt.Sprintf("[ERR] Loader not contain links"))
 	}
 
 	for _, group := range loader.ChannelGroups {
@@ -79,12 +79,14 @@ func (c *Crawler) Crawl(loader *Loader) error {
 				continue
 			}
 			defer resp.Body.Close()
+
 			body, err := ioutil.ReadAll(resp.Body)
 
 			var rss Rss
 			err = xml.Unmarshal(body, &rss)
 			if err != nil {
 				fmt.Printf("[ERR] Unable to unmarshal %v: %v", string(body[:]), err)
+				continue
 			}
 
 			c.merge(rss.Channels)
@@ -98,7 +100,7 @@ func (c *Crawler) Crawl(loader *Loader) error {
 
 func (c *Crawler) merge(channels []*Channel) error {
 	if channels == nil {
-		return errors.New(fmt.Sprintf("Unvalid arg 'rss>Channels', %v", channels))
+		return errors.New(fmt.Sprintf("[ERR] Unvalid arg 'rss>Channels', %v", channels))
 	}
 
 	c.Rss.Channels = append(c.Rss.Channels, channels...)
