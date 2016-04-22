@@ -11,18 +11,18 @@ import (
 
 // Item models an 'item' of an RSS feed
 type Item struct {
-	Title string `xml:"title"`
-	Link  string `xml:"link"`
-	Desc  string `xml:"description"`
-	Date  string `xml:"pubDate"`
+	Title string `xml:"title"       json:"title"`
+	Link  string `xml:"link"        json:"link"`
+	Desc  string `xml:"description" json:"desc"`
+	Date  string `xml:"pubDate"     json:"-"`
 }
 
 // Channel models a 'channel' in an RSS feed
 type Channel struct {
-	Owner string
-	Title string  `xml:"title"`
-	Desc  string  `xml:"description"`
-	Items []*Item `xml:"item"`
+	Owner string  `xml:"-"           json:"-"`
+	Title string  `xml:"title"       json:"title"`
+	Desc  string  `xml:"description" json:"desc"`
+	Items []*Item `xml:"item"        json:"items"`
 }
 
 // Rss represents an RSS document
