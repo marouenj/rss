@@ -19,6 +19,7 @@ type Item struct {
 
 // Channel models a 'channel' in an RSS feed
 type Channel struct {
+	Owner string
 	Title string  `xml:"title"`
 	Desc  string  `xml:"description"`
 	Items []*Item `xml:"item"`
@@ -63,6 +64,10 @@ func (c *Crawler) Crawl(loader *Loader) error {
 			if err != nil {
 				fmt.Printf("[ERR] Unable to unmarshal %v: %v", string(body[:]), err)
 				continue
+			}
+
+			for _, channel := range rss.Channels {
+				channel.Owner = group.Owner
 			}
 
 			c.merge(rss.Channels)

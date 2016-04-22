@@ -214,6 +214,8 @@ func Test_merge(t *testing.T) {
 }
 
 func Test_Crawl(t *testing.T) {
+	owner := "any"
+
 	testCases := []struct {
 		bodies []string
 		rss    Rss
@@ -285,6 +287,7 @@ func Test_Crawl(t *testing.T) {
 				},
 				Channels: []*Channel{
 					&Channel{
+						Owner: owner,
 						Title: "WSJ.com: World News",
 						Desc:  "World News",
 						Items: []*Item{
@@ -423,6 +426,7 @@ func Test_Crawl(t *testing.T) {
 				},
 				Channels: []*Channel{
 					&Channel{
+						Owner: owner,
 						Title: "WSJ.com: World News",
 						Desc:  "World News",
 						Items: []*Item{
@@ -441,6 +445,7 @@ func Test_Crawl(t *testing.T) {
 						},
 					},
 					&Channel{
+						Owner: owner,
 						Title: "CNET iPhone Update",
 						Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
 						Items: []*Item{
@@ -487,7 +492,7 @@ func Test_Crawl(t *testing.T) {
 
 		loader.ChannelGroups = ChannelGroups{
 			ChannelGroup{
-				Owner:    "any",
+				Owner:    owner,
 				Channels: make([]string, len(testCase.bodies)),
 			},
 		}
