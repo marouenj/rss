@@ -29,19 +29,19 @@ func (cg ChannelGroups) Swap(i, j int) {
 	cg[i], cg[j] = cg[j], cg[i]
 }
 
-// load a json file into a ChannelGroups
+// init a ChannelGroups from a json file
 func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 	path := filepath.Join(dir, fname)
 
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading '%s': %s", path, err)
+		return nil, fmt.Errorf("[ERR] Unable to read '%s': %v", path, err)
 	}
 
 	var channelGroups ChannelGroups
 	err = json.Unmarshal(file, &channelGroups)
 	if err != nil {
-		return nil, fmt.Errorf("Error decoding '%s': %s", path, err)
+		return nil, fmt.Errorf("[ERR] Unable to decode '%s': %v", path, err)
 	}
 
 	return &channelGroups, nil
@@ -80,30 +80,26 @@ func (l *Loader) Load(file string) error {
 	// open file
 	f, err := os.Open(file)
 	if err != nil {
-		fmt.Printf("Error opening '%s': %s\n", file, err)
-		os.Exit(1)
+		return fmt.Errorf("[ERR] Unable to open '%s': %v", file, err)
 	}
 	defer f.Close()
 
 	// get file info
 	fi, err := f.Stat()
 	if err != nil {
-		fmt.Printf("Error reading stats for '%s': %s\n", file, err)
-		os.Exit(1)
+		return fmt.Errorf("[ERR] Unable to read stats of '%s': %v", file, err)
 	}
 
 	if !fi.IsDir() { // is a file
 		groups, err := NewChannelGroups("", file)
 		if err != nil {
-			fmt.Printf("Error reading '%s': %s\n", file, err)
-			os.Exit(1)
+			return err // already formatted
 		}
 		l.ChannelGroups = *groups
 	} else { // is a dir
 		contents, err := f.Readdir(-1)
 		if err != nil {
-			fmt.Printf("Error reading '%s': %s\n", file, err)
-			os.Exit(1)
+			return fmt.Errorf("[ERR] Unable to list dir entries of '%s': %v", file, err)
 		}
 
 		// sort the contents, ensures lexical order
@@ -122,17 +118,19 @@ func (l *Loader) Load(file string) error {
 
 			groups, err := NewChannelGroups(file, fi.Name())
 			if err != nil {
-				fmt.Printf("Error reading '%s': %s\n", fi.Name(), err)
-				os.Exit(1)
+				return err // already formatted
 			}
 			l.ChannelGroups = append(l.ChannelGroups, *groups...)
 		}
 	}
 
-	// sort by owner
+	// sort owners
 	sort.Sort(l.ChannelGroups)
+
+	// owners listed more than once have their content merged together
 	l.ChannelGroups.merge()
 
+	// sort channels
 	for _, ChannelGroup := range l.ChannelGroups {
 		sort.Strings(ChannelGroup.Channels)
 	}
@@ -142,7 +140,7 @@ func (l *Loader) Load(file string) error {
 
 type dirEntries []os.FileInfo
 
-// Implement the sort interface for dirEnts
+// Implement the sort interface for dirEntries
 func (d dirEntries) Len() int {
 	return len(d)
 }
