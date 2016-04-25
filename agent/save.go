@@ -4,7 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"util"
+
+	"github.com/marouenj/rss/util"
 )
 
 type Owner struct {
