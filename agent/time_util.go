@@ -71,3 +71,19 @@ func parsePubDate(date string) (time.Time, error) {
 	loc, _ := time.LoadLocation(tzVal)
 	return time.ParseInLocation(time.RFC1123, date, loc) // parse with respect to the location
 }
+
+func DateInUtc(t time.Time) string {
+	year, month, day := t.In(time.UTC).Date()
+
+	monthPadding := ""
+	if month < 10 {
+		monthPadding = "0"
+	}
+
+	dayPadding := ""
+	if day < 10 {
+		dayPadding = "0"
+	}
+
+	return fmt.Sprintf("%d-%s%d-%s%d", year, monthPadding, month, dayPadding, day)
+}

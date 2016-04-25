@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -201,6 +202,35 @@ func Test_parsePubDate_ConvertToUtc(t *testing.T) {
 		hour, min, sec := parsed.Clock()
 		if year != testCase.year || month != testCase.month || day != testCase.day || hour != testCase.hour || min != testCase.min || sec != testCase.sec {
 			t.Errorf("[Test case %d] expecting (year, month, day, hour, min, sec) as (%d, %d, %d, %d, %d, %d), got (%d, %d, %d, %d, %d, %d)", idx, year, month, day, hour, min, sec, testCase.year, testCase.month, testCase.day, testCase.hour, testCase.min, testCase.sec)
+		}
+	}
+}
+
+func Test_DateInUtc(t *testing.T) {
+	testCases := []struct {
+		in  string
+		out string
+	}{
+		{
+			"Tue, 19 Apr 2016 17:25:18 +0000",
+			"2016-04-19",
+		},
+		{
+			"Tue, 05 Apr 2016 17:25:18 +0000",
+			"2016-04-05",
+		},
+	}
+
+	for idx, testCase := range testCases {
+		parsed, err := parsePubDate(testCase.in)
+		if err != nil {
+			t.Error(err)
+		}
+
+		inUtc := DateInUtc(parsed)
+
+		if strings.Compare(inUtc, testCase.out) != 0 {
+			t.Errorf("[Test case %d] expecting %s, got %s", idx, testCase.out, inUtc)
 		}
 	}
 }
