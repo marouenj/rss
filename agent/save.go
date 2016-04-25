@@ -92,7 +92,7 @@ func (d *Days) AddItem(item Item, date string, ownerId string, channelTitle stri
 		}
 	}
 
-	// check if the channel exist, create a new one otherwise
+	// check if the channel exist, add it to the list otherwise
 	if idxItem == -1 {
 		(*items) = append(*items, &item)
 	}
