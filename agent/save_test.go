@@ -301,3 +301,326 @@ func Test_AddItem(t *testing.T) {
 		}
 	}
 }
+
+func Test_ReArrange(t *testing.T) {
+	testCases := []struct {
+		channels Channels // in
+		days     Days
+	}{
+		{ // test case 0, one date, one owner, one channel, one item
+			Channels{
+				&Channel{
+					Owner: "cnet",
+					Title: "CNET iPhone Update",
+					Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+					Items: &Items{
+						&Item{
+							Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+							Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+							Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+							Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-19",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+											Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+											Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+											Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 1, one date, one owner, one channel, two items
+			Channels{
+				&Channel{
+					Owner: "cnet",
+					Title: "CNET iPhone Update",
+					Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+					Items: &Items{
+						&Item{
+							Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+							Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+							Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+							Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+						},
+						&Item{
+							Title: "9 settings every new iPhone owner should change - CNET",
+							Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+							Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+							Date:  "Tue, 19 Apr 2016 20:25:18 +0000",
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-19",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+											Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+											Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+											Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+										},
+										&Item{
+											Title: "9 settings every new iPhone owner should change - CNET",
+											Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+											Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+											Date:  "Tue, 19 Apr 2016 20:25:18 +0000",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 2, one date, one owner, two channels
+			Channels{
+				&Channel{
+					Owner: "cnet",
+					Title: "CNET iPhone Update",
+					Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+					Items: &Items{
+						&Item{
+							Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+							Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+							Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+							Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+						},
+					},
+				},
+				&Channel{
+					Owner: "cnet",
+					Title: "CNET Android Update",
+					Desc:  "News, analysis and tips on the Google Android operating system, and devices and apps that use it.",
+					Items: &Items{
+						&Item{
+							Title: "Google Play Music adds podcasts to the mix - CNET",
+							Link:  "http://www.cnet.com/news/google-play-music-now-does-podcasts-too/#ftag=CADe34d7bf",
+							Desc:  "The streaming service will offer up podcasts based on what users are doing or interested in, similar to its contextual playlists for music.",
+							Date:  "Tue, 19 Apr 2016 13:25:18 +0000",
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-19",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+											Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+											Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+											Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+										},
+									},
+								},
+								&Channel{
+									Title: "CNET Android Update",
+									Desc:  "News, analysis and tips on the Google Android operating system, and devices and apps that use it.",
+									Items: &Items{
+										&Item{
+											Title: "Google Play Music adds podcasts to the mix - CNET",
+											Link:  "http://www.cnet.com/news/google-play-music-now-does-podcasts-too/#ftag=CADe34d7bf",
+											Desc:  "The streaming service will offer up podcasts based on what users are doing or interested in, similar to its contextual playlists for music.",
+											Date:  "Tue, 19 Apr 2016 13:25:18 +0000",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 3, one date, two owners
+			Channels{
+				&Channel{
+					Owner: "cnet",
+					Title: "CNET iPhone Update",
+					Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+					Items: &Items{
+						&Item{
+							Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+							Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+							Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+							Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+						},
+					},
+				},
+				&Channel{
+					Owner: "wsj",
+					Title: "WSJ.com: World News",
+					Desc:  "World News",
+					Items: &Items{
+						&Item{
+							Title: "Death Toll Rises Following Ecuador Earthquake",
+							Link:  "http://www.wsj.com/articles/death-toll-in-ecuador-earthquake-climbs-as-correa-tours-ravaged-areas-1460993084?mod=fox_australian",
+							Desc:  "The death toll in the magnitude-7.8 earthquake that struck this small country’s coast rose to 413, officials said.",
+							Date:  "Tue, 19 Apr 2016 20:25:18 +0000",
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-19",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+											Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+											Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+											Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+										},
+									},
+								},
+							},
+						},
+						&Owner{
+							Id: "wsj",
+							Channels: &Channels{
+								&Channel{
+									Title: "WSJ.com: World News",
+									Desc:  "World News",
+									Items: &Items{
+										&Item{
+											Title: "Death Toll Rises Following Ecuador Earthquake",
+											Link:  "http://www.wsj.com/articles/death-toll-in-ecuador-earthquake-climbs-as-correa-tours-ravaged-areas-1460993084?mod=fox_australian",
+											Desc:  "The death toll in the magnitude-7.8 earthquake that struck this small country’s coast rose to 413, officials said.",
+											Date:  "Tue, 19 Apr 2016 20:25:18 +0000",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 4, two dates
+			Channels{
+				&Channel{
+					Owner: "cnet",
+					Title: "CNET iPhone Update",
+					Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+					Items: &Items{
+						&Item{
+							Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+							Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+							Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+							Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+						},
+						&Item{
+							Title: "9 settings every new iPhone owner should change - CNET",
+							Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+							Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+							Date:  "Tue, 05 Apr 2016 20:25:18 +0000",
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-19",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+											Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+											Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+											Date:  "Tue, 19 Apr 2016 17:25:18 +0000",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				&Day{
+					Date: "2016-04-05",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "9 settings every new iPhone owner should change - CNET",
+											Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+											Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+											Date:  "Tue, 05 Apr 2016 20:25:18 +0000",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for idx, testCase := range testCases {
+		marshaller := &Marshaller{
+			Days: &Days{},
+		}
+
+		err := marshaller.ReArrange(testCase.channels)
+		if err != nil {
+			t.Error(err)
+		}
+
+		if !reflect.DeepEqual(*marshaller.Days, testCase.days) {
+			t.Errorf("[Test case %d], expected %+v, got %+v", idx, testCase.days, *marshaller.Days)
+		}
+	}
+}

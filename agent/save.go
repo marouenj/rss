@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -95,6 +97,29 @@ func (d *Days) AddItem(item Item, date string, ownerId string, channelTitle stri
 	// check if the channel exist, add it to the list otherwise
 	if idxItem == -1 {
 		(*items) = append(*items, &item)
+	}
+
+	return nil
+}
+
+type Marshaller struct {
+	Days *Days
+}
+
+func (m *Marshaller) ReArrange(channels Channels) error {
+	if channels == nil {
+		return errors.New(fmt.Sprintf("[ERR] Argument is nil"))
+	}
+
+	for _, channel := range channels {
+		for _, item := range *channel.Items {
+			parsed, err := parsePubDate(item.Date)
+			if err != nil {
+				return err
+			}
+
+			m.Days.AddItem(*item, DateInUtc(parsed), channel.Owner, channel.Title, channel.Desc)
+		}
 	}
 
 	return nil
