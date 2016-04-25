@@ -1,4 +1,4 @@
-package agent
+package util
 
 import (
 	"strings"
@@ -98,7 +98,7 @@ func Test_tzIsAbbr(t *testing.T) {
 	}
 }
 
-func Test_parsePubDate(t *testing.T) {
+func Test_ParsePubDate(t *testing.T) {
 	testCases := []struct {
 		in    string // in
 		year  int    // out
@@ -129,7 +129,7 @@ func Test_parsePubDate(t *testing.T) {
 	}
 
 	for idx, testCase := range testCases {
-		parsed, err := parsePubDate(testCase.in)
+		parsed, err := ParsePubDate(testCase.in)
 		if err != nil {
 			t.Error(err)
 		}
@@ -142,7 +142,7 @@ func Test_parsePubDate(t *testing.T) {
 	}
 }
 
-func Test_parsePubDate_ConvertToUtc(t *testing.T) {
+func Test_ParsePubDate_ConvertToUtc(t *testing.T) {
 	testCases := []struct {
 		in    string // in
 		year  int    // out
@@ -191,7 +191,7 @@ func Test_parsePubDate_ConvertToUtc(t *testing.T) {
 	}
 
 	for idx, testCase := range testCases {
-		parsed, err := parsePubDate(testCase.in)
+		parsed, err := ParsePubDate(testCase.in)
 		if err != nil {
 			t.Error(err)
 		}
@@ -222,7 +222,7 @@ func Test_DateInUtc(t *testing.T) {
 	}
 
 	for idx, testCase := range testCases {
-		parsed, err := parsePubDate(testCase.in)
+		parsed, err := ParsePubDate(testCase.in)
 		if err != nil {
 			t.Error(err)
 		}

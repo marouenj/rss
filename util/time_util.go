@@ -1,4 +1,4 @@
-package agent
+package util
 
 import (
 	"errors"
@@ -35,7 +35,7 @@ var Tz = map[string]string{
 }
 
 // <pubDate> tag in RSS XML files contains the date the article was published
-func parsePubDate(date string) (time.Time, error) {
+func ParsePubDate(date string) (time.Time, error) {
 	// locate the last space
 	lastSpace := strings.LastIndex(date, " ")
 	if lastSpace == -1 { // space not exist at all
