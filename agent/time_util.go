@@ -12,7 +12,7 @@ const tzNumeric = "[+-]{1}[0-9]{4}"
 
 func tzIsNumeric(candidate string) (bool, error) {
 	matched, err := regexp.MatchString(tzNumeric, candidate)
-	if err != nil {
+	if err != nil { // handle any error extrinsic to this function
 		return false, errors.New(fmt.Sprintf("[ERR] %v", err))
 	}
 
@@ -23,7 +23,7 @@ const tzAbbr = "[A-Z]{1,}"
 
 func tzIsAbbr(candidate string) (bool, error) {
 	matched, err := regexp.MatchString(tzAbbr, candidate)
-	if err != nil {
+	if err != nil { // handle any error extrinsic to this function
 		return false, errors.New(fmt.Sprintf("[ERR] %v", err))
 	}
 
@@ -34,6 +34,7 @@ var Tz = map[string]string{
 	"EDT": "America/New_York",
 }
 
+// <pubDate> tag in RSS XML files contains the date the article was published
 func parsePubDate(date string) (time.Time, error) {
 	// locate the last space
 	lastSpace := strings.LastIndex(date, " ")
@@ -47,19 +48,17 @@ func parsePubDate(date string) (time.Time, error) {
 	tz := date[lastSpace+1 : len(date)] // extract time zone
 
 	isNumeric, err := tzIsNumeric(tz)
-	if err != nil {
-		return time.Time{}, errors.New(fmt.Sprintf("[ERR] %v", err))
+	if err != nil { // error already formatted, return error as is
+		return time.Time{}, err
 	}
-
 	if isNumeric { // Parse takes into consideration the time diff
 		return time.Parse(time.RFC1123Z, date)
 	}
 
 	isAbbr, err := tzIsAbbr(tz)
-	if err != nil {
-		return time.Time{}, errors.New(fmt.Sprintf("[ERR] %v", err))
+	if err != nil { // error already formatted, return error as is
+		return time.Time{}, err
 	}
-
 	if !isAbbr {
 		return time.Time{}, errors.New(fmt.Sprintf("[ERR] Time zone '%s' has wrong format", tz))
 	}
