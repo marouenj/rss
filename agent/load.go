@@ -48,6 +48,7 @@ func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 }
 
 // group by owner
+// owners are assumed to be sorted
 func (cg *ChannelGroups) mergeOwners() error {
 	curr := 0
 	for idx, _ := range (*cg)[1:] {
@@ -68,6 +69,7 @@ func (cg *ChannelGroups) mergeOwners() error {
 }
 
 // remove duplicate links (scope is within same owner)
+// links are assumed to be sorted
 func (cg *ChannelGroups) cleanLinks() error {
 	for idxG, _ := range *cg {
 		curr := 0
