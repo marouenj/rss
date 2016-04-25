@@ -1,8 +1,12 @@
 package agent
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/marouenj/rss/util"
@@ -104,10 +108,22 @@ func (d *Days) AddItem(item Item, date string, ownerId string, channelTitle stri
 	return nil
 }
 
+// agent that's responsible for merging new feeds with existing ones
+// then persisting them back to disk
 type Marshaller struct {
 	Days *Days
+	dir  string // dir to load from/save to
 }
 
+// init a new agent
+func NewMarshaller(dir string) (*Marshaller, error) {
+	return &Marshaller{
+		Days: &Days{},
+		dir:  dir,
+	}, nil
+}
+
+// organizes the crawler channel-centric data into date-centric data
 func (m *Marshaller) ReArrange(channels Channels) error {
 	if channels == nil {
 		return errors.New(fmt.Sprintf("[ERR] Argument is nil"))
@@ -115,14 +131,51 @@ func (m *Marshaller) ReArrange(channels Channels) error {
 
 	for _, channel := range channels {
 		for _, item := range *channel.Items {
-			parsed, err := util.ParsePubDate(item.Date)
+			date, err := util.ParsePubDate(item.Date)
 			if err != nil {
-				return err
+				continue
 			}
 
-			m.Days.AddItem(*item, util.DateInUtc(parsed), channel.Owner, channel.Title, channel.Desc)
+			m.Days.AddItem(*item, util.DateInUtc(date), channel.Owner, channel.Title, channel.Desc)
 		}
 	}
 
+	return nil
+}
+
+func (m *Marshaller) Save() error {
+	return nil
+}
+
+func (m *Marshaller) load(date string) (*Day, error) {
+	path := filepath.Join(m.dir, date)
+
+	// file for this date hasn't been initialized yet
+	if _, err := os.Stat(path); err != nil {
+		return &Day{
+			Date:   date,
+			Owners: &Owners{},
+		}, nil
+	}
+
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("[ERR] Unable to read '%s': %v", path, err)
+	}
+
+	var day Day
+	err = json.Unmarshal(file, &day)
+	if err != nil {
+		return nil, fmt.Errorf("[ERR] Unable to decode '%s': %v", path, err)
+	}
+
+	return &day, nil
+}
+
+func (m *Marshaller) merge() error {
+	return nil
+}
+
+func (m *Marshaller) clean() error {
 	return nil
 }

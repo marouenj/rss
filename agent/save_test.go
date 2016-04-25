@@ -1,7 +1,11 @@
 package agent
 
 import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -622,5 +626,101 @@ func Test_ReArrange(t *testing.T) {
 		if !reflect.DeepEqual(*marshaller.Days, testCase.days) {
 			t.Errorf("[Test case %d], expected %+v, got %+v", idx, testCase.days, *marshaller.Days)
 		}
+	}
+}
+
+func Test_load(t *testing.T) {
+	testCases := []struct {
+		date string // in
+		load string
+		day  Day
+	}{
+		{ // test case 0, date not exists
+			"2016-04-25",
+			"", // to say 'the file does not exist'
+			Day{
+				Date:   "2016-04-25",
+				Owners: &Owners{},
+			},
+		},
+		{ // test case 1, date exists
+			"2016-04-25",
+			`
+		    {
+		        "date": "2016-04-25",
+		        "owners": [
+		            {
+		                "id": "cnet",
+		                "channels": [
+		                    {
+		                        "title": "CNET iPhone Update",
+		                        "desc": "Tips, news, how tos, and troubleshooting help for the iPhone.",
+		                        "items": [
+		                            {
+		                                "title": "Apple iPhone SE owners bemoan audio bug - CNET",
+		                                "link": "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+		                                "desc": "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners."
+		                            }
+		                        ]
+		                    }
+		                ]
+		            }
+		        ]
+		    }
+			`,
+			Day{
+				Date: "2016-04-25",
+				Owners: &Owners{
+					&Owner{
+						Id: "cnet",
+						Channels: &Channels{
+							&Channel{
+								Title: "CNET iPhone Update",
+								Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+								Items: &Items{
+									&Item{
+										Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+										Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+										Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for idx, testCase := range testCases {
+		// create temp dir
+		dir, err := ioutil.TempDir("", "dir")
+		if err != nil {
+			t.Error(err)
+		}
+
+		if strings.Compare(testCase.load, "") != 0 {
+			// write json load to temp file
+			file := filepath.Join(dir, testCase.date)
+			err = ioutil.WriteFile(file, []byte(testCase.load), 0666)
+			if err != nil {
+				t.Error(err)
+			}
+		}
+
+		marshaller, _ := NewMarshaller(dir)
+
+		// under test
+		day, err := marshaller.load(testCase.date)
+		if err != nil {
+			t.Error(err)
+		}
+		// assert
+		if !reflect.DeepEqual(*day, testCase.day) {
+			t.Errorf("[Test case %d], expected %+v, got %+v", idx, testCase.day, *day)
+		}
+
+		// clean
+		os.RemoveAll(dir)
 	}
 }
