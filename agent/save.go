@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"util"
 )
 
 type Owner struct {
@@ -113,12 +114,12 @@ func (m *Marshaller) ReArrange(channels Channels) error {
 
 	for _, channel := range channels {
 		for _, item := range *channel.Items {
-			parsed, err := parsePubDate(item.Date)
+			parsed, err := util.ParsePubDate(item.Date)
 			if err != nil {
 				return err
 			}
 
-			m.Days.AddItem(*item, DateInUtc(parsed), channel.Owner, channel.Title, channel.Desc)
+			m.Days.AddItem(*item, util.DateInUtc(parsed), channel.Owner, channel.Title, channel.Desc)
 		}
 	}
 
