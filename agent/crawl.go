@@ -19,6 +19,17 @@ type Item struct {
 
 type Items []*Item
 
+// implement the sort interface for Items
+func (it Items) Len() int {
+	return len(it)
+}
+func (it Items) Less(i, j int) bool {
+	return strings.Compare(it[i].Title, it[j].Title) < 0
+}
+func (it Items) Swap(i, j int) {
+	it[i], it[j] = it[j], it[i]
+}
+
 // Channel models a 'channel' in an RSS feed
 type Channel struct {
 	Owner string `xml:"-"           json:"-"`
@@ -28,6 +39,17 @@ type Channel struct {
 }
 
 type Channels []*Channel
+
+// implement the sort interface for Channels
+func (ch Channels) Len() int {
+	return len(ch)
+}
+func (ch Channels) Less(i, j int) bool {
+	return strings.Compare(ch[i].Title, ch[j].Title) < 0
+}
+func (ch Channels) Swap(i, j int) {
+	ch[i], ch[j] = ch[j], ch[i]
+}
 
 // Rss represents an RSS document
 type Rss struct {
