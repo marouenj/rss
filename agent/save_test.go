@@ -724,3 +724,934 @@ func Test_load(t *testing.T) {
 		os.RemoveAll(dir)
 	}
 }
+
+func Test_mergeItems(t *testing.T) {
+	testCases := []struct {
+		src  *Items // in
+		dest *Items
+		out  *Items //out
+	}{
+		{
+			&Items{
+				&Item{
+					Title: "9 settings every new iPhone owner should change - CNET",
+					Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+					Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+				},
+			},
+			&Items{
+				&Item{
+					Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+					Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+					Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+				},
+			},
+			&Items{
+				&Item{
+					Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+					Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+					Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+				},
+				&Item{
+					Title: "9 settings every new iPhone owner should change - CNET",
+					Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+					Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+				},
+			},
+		},
+	}
+
+	for idx, testCase := range testCases {
+		err := mergeItems(testCase.src, testCase.dest)
+		if err != nil {
+			t.Error(err)
+		}
+
+		// assert
+		if !reflect.DeepEqual(*testCase.dest, *testCase.out) {
+			t.Errorf("[Test case %d], expected %+v, got %+v", idx, testCase.out, testCase.dest)
+		}
+	}
+}
+
+func Test_mergeChannels(t *testing.T) {
+	testCases := []struct {
+		src  *Channels // in
+		dest *Channels
+		out  *Channels //out
+	}{
+		{ // test case 0, different channels
+			&Channels{
+				&Channel{
+					Title: "CNET iPhone Update",
+					Items: &Items{
+						&Item{
+							Title: "9 settings every new iPhone owner should change - CNET",
+							Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+							Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+						},
+					},
+				},
+			},
+			&Channels{
+				&Channel{
+					Title: "CNET Gaming",
+					Items: &Items{
+						&Item{
+							Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+							Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+							Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+						},
+					},
+				},
+			},
+			&Channels{
+				&Channel{
+					Title: "CNET Gaming",
+					Items: &Items{
+						&Item{
+							Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+							Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+							Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+						},
+					},
+				},
+				&Channel{
+					Title: "CNET iPhone Update",
+					Items: &Items{
+						&Item{
+							Title: "9 settings every new iPhone owner should change - CNET",
+							Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+							Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+						},
+					},
+				},
+			},
+		},
+		{ // test case 1, same channels
+			&Channels{
+				&Channel{
+					Title: "CNET iPhone Update",
+					Items: &Items{
+						&Item{
+							Title: "9 settings every new iPhone owner should change - CNET",
+							Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+							Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+						},
+					},
+				},
+			},
+			&Channels{
+				&Channel{
+					Title: "CNET iPhone Update",
+					Items: &Items{
+						&Item{
+							Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+							Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+							Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+						},
+					},
+				},
+			},
+			&Channels{
+				&Channel{
+					Title: "CNET iPhone Update",
+					Items: &Items{
+						&Item{
+							Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+							Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+							Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+						},
+						&Item{
+							Title: "9 settings every new iPhone owner should change - CNET",
+							Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+							Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for idx, testCase := range testCases {
+		err := mergeChannels(testCase.src, testCase.dest)
+		if err != nil {
+			t.Error(err)
+		}
+
+		// assert
+		if !reflect.DeepEqual(*testCase.dest, *testCase.out) {
+			t.Errorf("[Test case %d], expected %+v, got %+v", idx, testCase.out, testCase.dest)
+		}
+	}
+}
+
+func Test_mergeOwners(t *testing.T) {
+	testCases := []struct {
+		src  *Owners // in
+		dest *Owners
+		out  *Owners //out
+	}{
+		{ // test case 0, different owners
+			&Owners{
+				&Owner{
+					Id: "cnet01",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET iPhone Update",
+							Items: &Items{
+								&Item{
+									Title: "9 settings every new iPhone owner should change - CNET",
+									Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+									Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+								},
+							},
+						},
+					},
+				},
+			},
+			&Owners{
+				&Owner{
+					Id: "cnet02",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET Gaming",
+							Items: &Items{
+								&Item{
+									Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+									Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+									Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+								},
+							},
+						},
+					},
+				},
+			},
+			&Owners{
+				&Owner{
+					Id: "cnet02",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET Gaming",
+							Items: &Items{
+								&Item{
+									Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+									Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+									Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+								},
+							},
+						},
+					},
+				},
+				&Owner{
+					Id: "cnet01",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET iPhone Update",
+							Items: &Items{
+								&Item{
+									Title: "9 settings every new iPhone owner should change - CNET",
+									Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+									Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 1, same owner, different channels
+			&Owners{
+				&Owner{
+					Id: "cnet01",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET iPhone Update",
+							Items: &Items{
+								&Item{
+									Title: "9 settings every new iPhone owner should change - CNET",
+									Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+									Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+								},
+							},
+						},
+					},
+				},
+			},
+			&Owners{
+				&Owner{
+					Id: "cnet01",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET Gaming",
+							Items: &Items{
+								&Item{
+									Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+									Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+									Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+								},
+							},
+						},
+					},
+				},
+			},
+			&Owners{
+				&Owner{
+					Id: "cnet01",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET Gaming",
+							Items: &Items{
+								&Item{
+									Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+									Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+									Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+								},
+							},
+						},
+						&Channel{
+							Title: "CNET iPhone Update",
+							Items: &Items{
+								&Item{
+									Title: "9 settings every new iPhone owner should change - CNET",
+									Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+									Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 2, same owner, same channel
+			&Owners{
+				&Owner{
+					Id: "cnet01",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET iPhone Update",
+							Items: &Items{
+								&Item{
+									Title: "9 settings every new iPhone owner should change - CNET",
+									Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+									Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+								},
+							},
+						},
+					},
+				},
+			},
+			&Owners{
+				&Owner{
+					Id: "cnet01",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET iPhone Update",
+							Items: &Items{
+								&Item{
+									Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+									Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+									Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+								},
+							},
+						},
+					},
+				},
+			},
+			&Owners{
+				&Owner{
+					Id: "cnet01",
+					Channels: &Channels{
+						&Channel{
+							Title: "CNET iPhone Update",
+							Items: &Items{
+								&Item{
+									Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+									Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+									Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+								},
+								&Item{
+									Title: "9 settings every new iPhone owner should change - CNET",
+									Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+									Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for idx, testCase := range testCases {
+		err := mergeOwners(testCase.src, testCase.dest)
+		if err != nil {
+			t.Error(err)
+		}
+
+		// assert
+		if !reflect.DeepEqual(*testCase.dest, *testCase.out) {
+			t.Errorf("[Test case %d], expected %+v, got %+v", idx, testCase.out, testCase.dest)
+		}
+	}
+}
+
+func Test_clean(t *testing.T) {
+	testCases := []struct {
+		in  Day // in
+		out Day //out
+	}{
+		{
+			Day{
+				Owners: &Owners{
+					&Owner{
+						Id:       "cnet02",
+						Channels: &Channels{},
+					},
+					&Owner{
+						Id: "cnet01",
+						Channels: &Channels{
+							&Channel{
+								Title: "CNET iPhone Update",
+								Items: &Items{
+									&Item{
+										Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+										Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+										Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+									},
+									&Item{
+										Title: "9 settings every new iPhone owner should change - CNET",
+										Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+										Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+									},
+								},
+							},
+							&Channel{
+								Title: "CNET Gaming",
+								Items: &Items{},
+							},
+						},
+					},
+				},
+			},
+			Day{
+				Owners: &Owners{
+					&Owner{
+						Id: "cnet01",
+						Channels: &Channels{
+							&Channel{
+								Title: "CNET Gaming",
+								Items: &Items{},
+							},
+							&Channel{
+								Title: "CNET iPhone Update",
+								Items: &Items{
+									&Item{
+										Title: "9 settings every new iPhone owner should change - CNET",
+										Link:  "http://www.cnet.com/how-to/9-settings-you-should-change-on-your-new-iphone/#ftag=CAD4aa2096",
+										Desc:  "Whether you're a newcomer to iOS or just upgrading to a newer model, consider tweaking these settings to improve performance and battery life.",
+									},
+									&Item{
+										Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+										Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+										Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+									},
+								},
+							},
+						},
+					},
+					&Owner{
+						Id:       "cnet02",
+						Channels: &Channels{},
+					},
+				},
+			},
+		},
+	}
+
+	for idx, testCase := range testCases {
+		err := clean(testCase.in)
+		if err != nil {
+			t.Error(err)
+		}
+
+		// assert
+		if !reflect.DeepEqual(testCase.in, testCase.out) {
+			t.Errorf("[Test case %d], expected %+v, got %+v", idx, testCase.out, testCase.in)
+		}
+	}
+}
+
+func Test_Save(t *testing.T) {
+	testCases := []struct {
+		titles []string // in
+		bodies []string
+		src    Days
+		merged Days // out
+	}{
+		{ // test case 0, same date, same owner, same channel, same item
+			[]string{"2016-04-25"},
+			[]string{
+				`
+				{
+				    "date": "2016-04-25",
+				    "owners": [
+				        {
+				            "id": "cnet",
+				            "channels": [
+				                {
+				                    "title": "CNET iPhone Update",
+				                    "desc": "Tips, news, how tos, and troubleshooting help for the iPhone.",
+				                    "items": [
+				                        {
+				                            "title": "Apple iPhone SE owners bemoan audio bug - CNET",
+				                            "link": "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+				                            "desc": "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners."
+				                        }
+				                    ]
+				                }
+				            ]
+				        }
+				    ]
+				}
+				`,
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+											Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+											Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+											Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+											Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 1, same date, same owner, same channel, different items
+			[]string{"2016-04-25"},
+			[]string{
+				`
+				{
+				    "date": "2016-04-25",
+				    "owners": [
+				        {
+				            "id": "cnet",
+				            "channels": [
+				                {
+				                    "title": "CNET iPhone Update",
+				                    "desc": "Tips, news, how tos, and troubleshooting help for the iPhone.",
+				                    "items": [
+				                        {
+				                            "title": "Apple iPhone SE owners bemoan audio bug - CNET",
+				                            "link": "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+				                            "desc": "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners."
+				                        }
+				                    ]
+				                }
+				            ]
+				        }
+				    ]
+				}
+				`,
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "iPhone Upgrade Program launches at online Apple Store - CNET",
+											Link:  "http://www.cnet.com/news/iphone-upgrade-program-launches-at-online-apple-store/#ftag=CAD4aa2096",
+											Desc:  "The program that lets you upgrade your iPhone every year had been available only through Apple's retail outlets.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+											Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+											Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+										},
+										&Item{
+											Title: "iPhone Upgrade Program launches at online Apple Store - CNET",
+											Link:  "http://www.cnet.com/news/iphone-upgrade-program-launches-at-online-apple-store/#ftag=CAD4aa2096",
+											Desc:  "The program that lets you upgrade your iPhone every year had been available only through Apple's retail outlets.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 2, same date, same owner, different channels
+			[]string{"2016-04-25"},
+			[]string{
+				`
+				{
+				    "date": "2016-04-25",
+				    "owners": [
+				        {
+				            "id": "cnet",
+				            "channels": [
+				                {
+				                    "title": "CNET iPhone Update",
+				                    "desc": "Tips, news, how tos, and troubleshooting help for the iPhone.",
+				                    "items": [
+				                        {
+				                            "title": "Apple iPhone SE owners bemoan audio bug - CNET",
+				                            "link": "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+				                            "desc": "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners."
+				                        }
+				                    ]
+				                }
+				            ]
+				        }
+				    ]
+				}
+				`,
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET Gaming",
+									Desc:  "Game on! Get the latest in gaming news, video game reviews, computer games & video game consoles.",
+									Items: &Items{
+										&Item{
+											Title: "The Ikea VR experience, now with the meatball update you've been waiting for - CNET",
+											Link:  "http://www.cnet.com/news/the-ikea-vr-game-now-with-the-meatball-update-youve-been-waiting-for/#ftag=CADa872701",
+											Desc:  "The fans have spoken. You can now interact with virtual meatballs in the Ikea VR experience.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET Gaming",
+									Desc:  "Game on! Get the latest in gaming news, video game reviews, computer games & video game consoles.",
+									Items: &Items{
+										&Item{
+											Title: "The Ikea VR experience, now with the meatball update you've been waiting for - CNET",
+											Link:  "http://www.cnet.com/news/the-ikea-vr-game-now-with-the-meatball-update-youve-been-waiting-for/#ftag=CADa872701",
+											Desc:  "The fans have spoken. You can now interact with virtual meatballs in the Ikea VR experience.",
+										},
+									},
+								},
+								&Channel{
+									Title: "CNET iPhone Update",
+									Desc:  "Tips, news, how tos, and troubleshooting help for the iPhone.",
+									Items: &Items{
+										&Item{
+											Title: "Apple iPhone SE owners bemoan audio bug - CNET",
+											Link:  "http://www.cnet.com/news/apple-iphone-se-owners-complain-of-phone-call-audio-bug/#ftag=CAD4aa2096",
+											Desc:  "Introduced with the latest update to iOS, the glitch distorts the quality of phone calls made via Bluetooth, according to some owners.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 3, same date, different owners
+			[]string{"2016-04-25"},
+			[]string{
+				`
+				{
+				    "date": "2016-04-25",
+				    "owners": [
+				        {
+				            "id": "wsj",
+				            "channels": [
+				                {
+				                    "title": "WSJ.com: World News",
+				                    "desc": "World News",
+				                    "items": [
+				                        {
+				                            "title": "U.S., Turkey Step Up Border Campaign Against Islamic State",
+				                            "link": "http://www.wsj.com/articles/u-s-turkey-step-up-border-campaign-against-islamic-state-1461684454?mod=fox_australian",
+				                            "desc": "Ankara and Washington plan to deploy advanced rocket launchers and more Turkish forces to the Turkish-Syrian border in an effort to choke off a crucial Islamic State supply route."
+				                        }
+				                    ]
+				                }
+				            ]
+				        }
+				    ]
+				}
+				`,
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET Gaming",
+									Desc:  "Game on! Get the latest in gaming news, video game reviews, computer games & video game consoles.",
+									Items: &Items{
+										&Item{
+											Title: "The Ikea VR experience, now with the meatball update you've been waiting for - CNET",
+											Link:  "http://www.cnet.com/news/the-ikea-vr-game-now-with-the-meatball-update-youve-been-waiting-for/#ftag=CADa872701",
+											Desc:  "The fans have spoken. You can now interact with virtual meatballs in the Ikea VR experience.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET Gaming",
+									Desc:  "Game on! Get the latest in gaming news, video game reviews, computer games & video game consoles.",
+									Items: &Items{
+										&Item{
+											Title: "The Ikea VR experience, now with the meatball update you've been waiting for - CNET",
+											Link:  "http://www.cnet.com/news/the-ikea-vr-game-now-with-the-meatball-update-youve-been-waiting-for/#ftag=CADa872701",
+											Desc:  "The fans have spoken. You can now interact with virtual meatballs in the Ikea VR experience.",
+										},
+									},
+								},
+							},
+						},
+						&Owner{
+							Id: "wsj",
+							Channels: &Channels{
+								&Channel{
+									Title: "WSJ.com: World News",
+									Desc:  "World News",
+									Items: &Items{
+										&Item{
+											Title: "U.S., Turkey Step Up Border Campaign Against Islamic State",
+											Link:  "http://www.wsj.com/articles/u-s-turkey-step-up-border-campaign-against-islamic-state-1461684454?mod=fox_australian",
+											Desc:  "Ankara and Washington plan to deploy advanced rocket launchers and more Turkish forces to the Turkish-Syrian border in an effort to choke off a crucial Islamic State supply route.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ // test case 4, different dates
+			[]string{"2016-04-26"},
+			[]string{
+				`
+				{
+				    "date": "2016-04-26",
+				    "owners": [
+				        {
+				            "id": "wsj",
+				            "channels": [
+				                {
+				                    "title": "WSJ.com: World News",
+				                    "desc": "World News",
+				                    "items": [
+				                        {
+				                            "title": "U.S., Turkey Step Up Border Campaign Against Islamic State",
+				                            "link": "http://www.wsj.com/articles/u-s-turkey-step-up-border-campaign-against-islamic-state-1461684454?mod=fox_australian",
+				                            "desc": "Ankara and Washington plan to deploy advanced rocket launchers and more Turkish forces to the Turkish-Syrian border in an effort to choke off a crucial Islamic State supply route."
+				                        }
+				                    ]
+				                }
+				            ]
+				        }
+				    ]
+				}
+				`,
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET Gaming",
+									Desc:  "Game on! Get the latest in gaming news, video game reviews, computer games & video game consoles.",
+									Items: &Items{
+										&Item{
+											Title: "The Ikea VR experience, now with the meatball update you've been waiting for - CNET",
+											Link:  "http://www.cnet.com/news/the-ikea-vr-game-now-with-the-meatball-update-youve-been-waiting-for/#ftag=CADa872701",
+											Desc:  "The fans have spoken. You can now interact with virtual meatballs in the Ikea VR experience.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			Days{
+				&Day{
+					Date: "2016-04-25",
+					Owners: &Owners{
+						&Owner{
+							Id: "cnet",
+							Channels: &Channels{
+								&Channel{
+									Title: "CNET Gaming",
+									Desc:  "Game on! Get the latest in gaming news, video game reviews, computer games & video game consoles.",
+									Items: &Items{
+										&Item{
+											Title: "The Ikea VR experience, now with the meatball update you've been waiting for - CNET",
+											Link:  "http://www.cnet.com/news/the-ikea-vr-game-now-with-the-meatball-update-youve-been-waiting-for/#ftag=CADa872701",
+											Desc:  "The fans have spoken. You can now interact with virtual meatballs in the Ikea VR experience.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				&Day{
+					Date: "2016-04-26",
+					Owners: &Owners{
+						&Owner{
+							Id: "wsj",
+							Channels: &Channels{
+								&Channel{
+									Title: "WSJ.com: World News",
+									Desc:  "World News",
+									Items: &Items{
+										&Item{
+											Title: "U.S., Turkey Step Up Border Campaign Against Islamic State",
+											Link:  "http://www.wsj.com/articles/u-s-turkey-step-up-border-campaign-against-islamic-state-1461684454?mod=fox_australian",
+											Desc:  "Ankara and Washington plan to deploy advanced rocket launchers and more Turkish forces to the Turkish-Syrian border in an effort to choke off a crucial Islamic State supply route.",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for idx, testCase := range testCases {
+		// create temp dir
+		dir, err := ioutil.TempDir("", "dir")
+		if err != nil {
+			t.Error(err)
+		}
+
+		for idx, title := range testCase.titles {
+			// write json load to temp file
+			file := filepath.Join(dir, title)
+			err = ioutil.WriteFile(file, []byte(testCase.bodies[idx]), 0666)
+			if err != nil {
+				t.Error(err)
+			}
+		}
+
+		marshaller, _ := NewMarshaller(dir)
+		marshaller.Days = &testCase.src
+
+		// under test
+		err = marshaller.Save()
+		if err != nil {
+			t.Error(err)
+		}
+
+		for _, expected := range testCase.merged {
+			actual, err := marshaller.load(expected.Date)
+			if err != nil {
+				t.Error(err)
+			}
+
+			// assert
+			if !reflect.DeepEqual(actual, expected) {
+				t.Errorf("[Test case %d], expected %+v, got %+v", idx, expected, *actual)
+			}
+		}
+
+		// clean
+		os.RemoveAll(dir)
+	}
+}

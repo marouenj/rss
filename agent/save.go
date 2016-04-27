@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/marouenj/rss/util"
@@ -18,6 +19,17 @@ type Owner struct {
 }
 
 type Owners []*Owner
+
+// implement the sort interface for Owners
+func (ow Owners) Len() int {
+	return len(ow)
+}
+func (ow Owners) Less(i, j int) bool {
+	return strings.Compare(ow[i].Id, ow[j].Id) < 0
+}
+func (ow Owners) Swap(i, j int) {
+	ow[i], ow[j] = ow[j], ow[i]
+}
 
 type Day struct {
 	Date   string  `json:"date"`
@@ -123,7 +135,7 @@ func NewMarshaller(dir string) (*Marshaller, error) {
 	}, nil
 }
 
-// organizes the crawler channel-centric data into date-centric data
+// organizes the crawler channel-centric data into the marshaller date-centric data
 func (m *Marshaller) ReArrange(channels Channels) error {
 	if channels == nil {
 		return errors.New(fmt.Sprintf("[ERR] Argument is nil"))
@@ -143,7 +155,35 @@ func (m *Marshaller) ReArrange(channels Channels) error {
 	return nil
 }
 
+// for each day...
+// previous data is loaded from disk, if exists
+// current data is then merged with previous data
+// the whole is persisted back to disk
+// merging operation insures no duplicates in 'owner', 'channel' and 'item' levels
+// cleaning operation insures entries are sorted by 'owner', 'channel' and 'item'
 func (m *Marshaller) Save() error {
+	for _, src := range *m.Days {
+		dest, err := m.load(src.Date)
+		if err != nil {
+			return err // already formatted
+		}
+
+		merge(*src, *dest)
+		clean(*dest)
+
+		// persist back to disk
+		bytes, err := json.Marshal(*dest)
+		if err != nil {
+			return errors.New(fmt.Sprintf("[ERR] Unable to marshal: %v", err))
+		}
+
+		path := filepath.Join(m.dir, src.Date)
+		err = ioutil.WriteFile(path, bytes, 0666)
+		if err != nil {
+			return errors.New(fmt.Sprintf("[ERR] Unable to write to '%s': %v", path, err))
+		}
+	}
+
 	return nil
 }
 
@@ -172,10 +212,88 @@ func (m *Marshaller) load(date string) (*Day, error) {
 	return &day, nil
 }
 
-func (m *Marshaller) merge() error {
+func merge(src, dest Day) error {
+	mergeOwners(src.Owners, dest.Owners)
+
 	return nil
 }
 
-func (m *Marshaller) clean() error {
+func mergeOwners(src, dest *Owners) error {
+	for _, ownerSrc := range *src {
+		// optimistic search for the owner
+		idxOwner := -1
+		for idx, ownerDest := range *dest {
+			if strings.Compare(ownerSrc.Id, ownerDest.Id) == 0 {
+				idxOwner = idx
+				break
+			}
+		}
+
+		// check if the owner exist, append it otherwise
+		if idxOwner == -1 {
+			*dest = append(*dest, ownerSrc)
+		} else {
+			mergeChannels(ownerSrc.Channels, (*dest)[idxOwner].Channels)
+		}
+	}
+
+	return nil
+}
+
+func mergeChannels(src, dest *Channels) error {
+	for _, channelSrc := range *src {
+		// optimistic search for the channel
+		idxChannel := -1
+		for idx, channelDest := range *dest {
+			if strings.Compare(channelSrc.Title, channelDest.Title) == 0 {
+				idxChannel = idx
+				break
+			}
+		}
+
+		// check if the channel exist, append otherwise
+		if idxChannel == -1 {
+			*dest = append(*dest, channelSrc)
+		} else {
+			mergeItems(channelSrc.Items, (*dest)[idxChannel].Items)
+		}
+	}
+
+	return nil
+}
+
+func mergeItems(src, dest *Items) error {
+	for _, itemSrc := range *src {
+		// optimistic search for the item
+		idxItem := -1
+		for idx, itemDest := range *dest {
+			if strings.Compare(itemSrc.Title, itemDest.Title) == 0 {
+				idxItem = idx
+				break
+			}
+		}
+
+		// check if the item exist, append otherwise
+		if idxItem == -1 {
+			*dest = append(*dest, itemSrc)
+		}
+	}
+
+	// *dest = append(*dest, *src...)
+	return nil
+}
+
+func clean(day Day) error {
+	// sort owners
+	sort.Sort(*day.Owners)
+
+	// sort channels for each owner
+	for _, owner := range *day.Owners {
+		sort.Sort(*owner.Channels)
+		for _, channel := range *owner.Channels {
+			sort.Sort(*channel.Items)
+		}
+	}
+
 	return nil
 }
