@@ -11,4 +11,6 @@ type Crawl interface {
 }
 
 type Save interface {
+	ReArrange(channels Channels) error
+	Save() error
 }
