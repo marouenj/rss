@@ -762,10 +762,7 @@ func Test_mergeItems(t *testing.T) {
 	}
 
 	for idx, testCase := range testCases {
-		err := mergeItems(testCase.src, testCase.dest)
-		if err != nil {
-			t.Error(err)
-		}
+		mergeItems(testCase.src, testCase.dest)
 
 		// assert
 		if !reflect.DeepEqual(*testCase.dest, *testCase.out) {
@@ -874,10 +871,7 @@ func Test_mergeChannels(t *testing.T) {
 	}
 
 	for idx, testCase := range testCases {
-		err := mergeChannels(testCase.src, testCase.dest)
-		if err != nil {
-			t.Error(err)
-		}
+		mergeChannels(testCase.src, testCase.dest)
 
 		// assert
 		if !reflect.DeepEqual(*testCase.dest, *testCase.out) {
@@ -1084,10 +1078,7 @@ func Test_mergeOwners(t *testing.T) {
 	}
 
 	for idx, testCase := range testCases {
-		err := mergeOwners(testCase.src, testCase.dest)
-		if err != nil {
-			t.Error(err)
-		}
+		mergeOwners(testCase.src, testCase.dest)
 
 		// assert
 		if !reflect.DeepEqual(*testCase.dest, *testCase.out) {
@@ -1170,10 +1161,7 @@ func Test_clean(t *testing.T) {
 	}
 
 	for idx, testCase := range testCases {
-		err := clean(testCase.in)
-		if err != nil {
-			t.Error(err)
-		}
+		clean(testCase.in)
 
 		// assert
 		if !reflect.DeepEqual(testCase.in, testCase.out) {

@@ -2,7 +2,6 @@ package agent
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -67,18 +66,18 @@ func NewCrawler() (*Crawler, error) {
 
 func (c *Crawler) Crawl(loader *Loader) error {
 	if loader == nil {
-		return errors.New(fmt.Sprintf("[ERR] Loader is null"))
+		return fmt.Errorf("[ERR] 'loader' is null")
 	}
 
 	if loader.ChannelGroups == nil {
-		return errors.New(fmt.Sprintf("[ERR] Loader not contain links"))
+		return fmt.Errorf("[ERR] 'loader' not contains links")
 	}
 
 	for _, group := range loader.ChannelGroups {
 		for _, url := range group.Channels {
 			resp, err := http.Get(url)
 			if err != nil {
-				fmt.Printf("[ERR] Unable to GET %v: %v", url, err)
+				fmt.Printf("[ERR] Unable to GET '%s': %v", url, err)
 				continue
 			}
 			defer resp.Body.Close()
@@ -88,7 +87,7 @@ func (c *Crawler) Crawl(loader *Loader) error {
 			var rss Rss
 			err = xml.Unmarshal(body, &rss)
 			if err != nil {
-				fmt.Printf("[ERR] Unable to unmarshal %v: %v", string(body[:]), err)
+				fmt.Printf("[ERR] Unable to unmarshal '%s': %v", string(body[:]), err)
 				continue
 			}
 
@@ -96,7 +95,10 @@ func (c *Crawler) Crawl(loader *Loader) error {
 				channel.Owner = group.Owner
 			}
 
-			c.merge(rss.Channels)
+			err = c.merge(rss.Channels)
+			if err != nil {
+				fmt.Errorf("[ERR] Unable to merge channels '%v'", rss.Channels)
+			}
 		}
 	}
 
@@ -107,14 +109,14 @@ func (c *Crawler) Crawl(loader *Loader) error {
 
 func (c *Crawler) merge(channels []*Channel) error {
 	if channels == nil {
-		return errors.New(fmt.Sprintf("[ERR] Unvalid arg 'rss>Channels', %v", channels))
+		return fmt.Errorf("[ERR] Unvalid arg 'rss>Channels', %v", channels)
 	}
 
 	c.Rss.Channels = append(c.Rss.Channels, channels...)
 	return nil
 }
 
-func (c *Crawler) clean() error {
+func (c *Crawler) clean() {
 	for _, channel := range c.Rss.Channels {
 		channel.Title = strings.TrimSpace(channel.Title)
 		channel.Desc = strings.TrimSpace(channel.Desc)
@@ -125,21 +127,4 @@ func (c *Crawler) clean() error {
 			item.Date = strings.TrimSpace(item.Date)
 		}
 	}
-
-	return nil
-}
-
-func (c *Crawler) print() string {
-	s := ""
-	for _, channel := range c.Rss.Channels {
-		s = strings.Join([]string{s, fmt.Sprintf("Title: @%s@\n", channel.Title)}, "")
-		s = strings.Join([]string{s, fmt.Sprintf("Desc:  @%s@\n", channel.Desc)}, "")
-		for idx, item := range *channel.Items {
-			s = strings.Join([]string{s, fmt.Sprintf("\t%2d Title: @%s@\n", idx, item.Title)}, "")
-			s = strings.Join([]string{s, fmt.Sprintf("\t%2d Link:  @%s@\n", idx, item.Link)}, "")
-			s = strings.Join([]string{s, fmt.Sprintf("\t%2d Desc:  @%s@\n", idx, item.Desc)}, "")
-		}
-	}
-
-	return s
 }

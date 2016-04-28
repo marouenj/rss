@@ -1,7 +1,6 @@
 package util
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -13,7 +12,7 @@ const tzNumeric = "[+-]{1}[0-9]{4}"
 func tzIsNumeric(candidate string) (bool, error) {
 	matched, err := regexp.MatchString(tzNumeric, candidate)
 	if err != nil { // handle any error extrinsic to this function
-		return false, errors.New(fmt.Sprintf("[ERR] %v", err))
+		return false, fmt.Errorf("[ERR] %v", err)
 	}
 
 	return matched, nil
@@ -24,7 +23,7 @@ const tzAbbr = "[A-Z]{1,}"
 func tzIsAbbr(candidate string) (bool, error) {
 	matched, err := regexp.MatchString(tzAbbr, candidate)
 	if err != nil { // handle any error extrinsic to this function
-		return false, errors.New(fmt.Sprintf("[ERR] %v", err))
+		return false, fmt.Errorf("[ERR] %v", err)
 	}
 
 	return matched, nil
@@ -39,10 +38,10 @@ func ParsePubDate(date string) (time.Time, error) {
 	// locate the last space
 	lastSpace := strings.LastIndex(date, " ")
 	if lastSpace == -1 { // space not exist at all
-		return time.Time{}, errors.New(fmt.Sprintf("[ERR] Date '%s' has wrong format", date))
+		return time.Time{}, fmt.Errorf("[ERR] Date '%s' has wrong format", date)
 	}
 	if lastSpace == len(date)-1 { // last character is a space
-		return time.Time{}, errors.New(fmt.Sprintf("[ERR] Date '%s' has wrong format", date))
+		return time.Time{}, fmt.Errorf("[ERR] Date '%s' has wrong format", date)
 	}
 
 	tz := date[lastSpace+1 : len(date)] // extract time zone
@@ -60,12 +59,12 @@ func ParsePubDate(date string) (time.Time, error) {
 		return time.Time{}, err
 	}
 	if !isAbbr {
-		return time.Time{}, errors.New(fmt.Sprintf("[ERR] Time zone '%s' has wrong format", tz))
+		return time.Time{}, fmt.Errorf("[ERR] Time zone '%s' has wrong format", tz)
 	}
 
 	tzVal, ok := Tz[tz]
 	if !ok { // TODO log this
-		return time.Time{}, errors.New(fmt.Sprintf("[ERR] Key '%s' not exists in dictionary", tz))
+		return time.Time{}, fmt.Errorf("[ERR] Key '%s' not exists in dictionary", tz)
 	}
 
 	loc, _ := time.LoadLocation(tzVal)

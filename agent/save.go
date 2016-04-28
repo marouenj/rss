@@ -2,7 +2,6 @@ package agent
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -112,7 +111,7 @@ func (d *Days) AddItem(item Item, date string, ownerId string, channelTitle stri
 		}
 	}
 
-	// check if the channel exist, add it to the list otherwise
+	// add the item to the list if not exists
 	if idxItem == -1 {
 		(*items) = append(*items, &item)
 	}
@@ -138,13 +137,14 @@ func NewMarshaller(dir string) (*Marshaller, error) {
 // organizes the crawler channel-centric data into the marshaller date-centric data
 func (m *Marshaller) ReArrange(channels Channels) error {
 	if channels == nil {
-		return errors.New(fmt.Sprintf("[ERR] Argument is nil"))
+		return fmt.Errorf("[ERR] 'channels' is nil")
 	}
 
 	for _, channel := range channels {
 		for _, item := range *channel.Items {
 			date, err := util.ParsePubDate(item.Date)
 			if err != nil {
+				fmt.Printf("[ERR] Unable to parse date '%s': %v", item.Date, err)
 				continue
 			}
 
@@ -174,13 +174,13 @@ func (m *Marshaller) Save() error {
 		// persist back to disk
 		bytes, err := json.Marshal(*dest)
 		if err != nil {
-			return errors.New(fmt.Sprintf("[ERR] Unable to marshal: %v", err))
+			return fmt.Errorf("[ERR] Unable to marshal: %v", err)
 		}
 
 		path := filepath.Join(m.dir, src.Date)
 		err = ioutil.WriteFile(path, bytes, 0666)
 		if err != nil {
-			return errors.New(fmt.Sprintf("[ERR] Unable to write to '%s': %v", path, err))
+			return fmt.Errorf("[ERR] Unable to write to '%s': %v", path, err)
 		}
 	}
 
@@ -206,19 +206,17 @@ func (m *Marshaller) load(date string) (*Day, error) {
 	var day Day
 	err = json.Unmarshal(file, &day)
 	if err != nil {
-		return nil, fmt.Errorf("[ERR] Unable to decode '%s': %v", path, err)
+		return nil, fmt.Errorf("[ERR] Unable to unmarshal '%s': %v", path, err)
 	}
 
 	return &day, nil
 }
 
-func merge(src, dest Day) error {
+func merge(src, dest Day) {
 	mergeOwners(src.Owners, dest.Owners)
-
-	return nil
 }
 
-func mergeOwners(src, dest *Owners) error {
+func mergeOwners(src, dest *Owners) {
 	for _, ownerSrc := range *src {
 		// optimistic search for the owner
 		idxOwner := -1
@@ -236,11 +234,9 @@ func mergeOwners(src, dest *Owners) error {
 			mergeChannels(ownerSrc.Channels, (*dest)[idxOwner].Channels)
 		}
 	}
-
-	return nil
 }
 
-func mergeChannels(src, dest *Channels) error {
+func mergeChannels(src, dest *Channels) {
 	for _, channelSrc := range *src {
 		// optimistic search for the channel
 		idxChannel := -1
@@ -258,11 +254,9 @@ func mergeChannels(src, dest *Channels) error {
 			mergeItems(channelSrc.Items, (*dest)[idxChannel].Items)
 		}
 	}
-
-	return nil
 }
 
-func mergeItems(src, dest *Items) error {
+func mergeItems(src, dest *Items) {
 	for _, itemSrc := range *src {
 		// optimistic search for the item
 		idxItem := -1
@@ -278,22 +272,18 @@ func mergeItems(src, dest *Items) error {
 			*dest = append(*dest, itemSrc)
 		}
 	}
-
-	// *dest = append(*dest, *src...)
-	return nil
 }
 
-func clean(day Day) error {
+func clean(day Day) {
 	// sort owners
 	sort.Sort(*day.Owners)
 
 	// sort channels for each owner
 	for _, owner := range *day.Owners {
 		sort.Sort(*owner.Channels)
+		// sort items for each channel
 		for _, channel := range *owner.Channels {
 			sort.Sort(*channel.Items)
 		}
 	}
-
-	return nil
 }

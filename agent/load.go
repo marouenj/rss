@@ -30,8 +30,8 @@ func (cg ChannelGroups) Swap(i, j int) {
 }
 
 // init a ChannelGroups from a json file
-func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
-	path := filepath.Join(dir, fname)
+func NewChannelGroups(dir, fileName string) (*ChannelGroups, error) {
+	path := filepath.Join(dir, fileName)
 
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -41,7 +41,7 @@ func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 	var channelGroups ChannelGroups
 	err = json.Unmarshal(file, &channelGroups)
 	if err != nil {
-		return nil, fmt.Errorf("[ERR] Unable to decode '%s': %v", path, err)
+		return nil, fmt.Errorf("[ERR] Unable to unmarshal '%s': %v", path, err)
 	}
 
 	return &channelGroups, nil
@@ -52,6 +52,10 @@ func NewChannelGroups(dir string, fname string) (*ChannelGroups, error) {
 func (cg *ChannelGroups) mergeOwners() error {
 	curr := 0
 	for idx, _ := range (*cg)[1:] {
+		if strings.Compare((*cg)[idx].Owner, (*cg)[idx+1].Owner) > 0 { // check is sorted
+			return fmt.Errorf("Array not sorted: %v", cg)
+		}
+
 		if strings.Compare((*cg)[curr].Owner, (*cg)[idx+1].Owner) == 0 { // merge
 			(*cg)[curr].Channels = append((*cg)[curr].Channels, (*cg)[idx+1].Channels...)
 		} else {
@@ -71,19 +75,23 @@ func (cg *ChannelGroups) mergeOwners() error {
 // remove duplicate links (scope is within same owner)
 // links are assumed to be sorted
 func (cg *ChannelGroups) cleanLinks() error {
-	for idxG, _ := range *cg {
+	for idx, _ := range *cg {
 		curr := 0
-		for idx, _ := range (*cg)[idxG].Channels[1:] {
-			if strings.Compare((*cg)[idxG].Channels[curr], (*cg)[idxG].Channels[idx+1]) != 0 {
+		for idx2, _ := range (*cg)[idx].Channels[1:] {
+			if strings.Compare((*cg)[idx].Channels[idx2], (*cg)[idx].Channels[idx2+1]) > 0 { // check is sorted
+				return fmt.Errorf("Array not sorted: %v", (*cg)[idx].Channels)
+			}
+
+			if strings.Compare((*cg)[idx].Channels[curr], (*cg)[idx].Channels[idx2+1]) != 0 {
 				curr++
-				(*cg)[idxG].Channels[curr] = (*cg)[idxG].Channels[idx+1]
+				(*cg)[idx].Channels[curr] = (*cg)[idx].Channels[idx2+1]
 			}
 		}
 
 		// resize
-		t := (*cg)[idxG].Channels
-		(*cg)[idxG].Channels = make([]string, curr+1)
-		copy((*cg)[idxG].Channels, t)
+		t := (*cg)[idx].Channels
+		(*cg)[idx].Channels = make([]string, curr+1)
+		copy((*cg)[idx].Channels, t)
 	}
 
 	return nil
@@ -119,26 +127,26 @@ func (l *Loader) Load(file string) error {
 		}
 		l.ChannelGroups = *groups
 	} else { // is a dir
-		contents, err := f.Readdir(-1)
+		entries, err := f.Readdir(-1)
 		if err != nil {
 			return fmt.Errorf("[ERR] Unable to list dir entries of '%s': %v", file, err)
 		}
 
-		// sort the contents, ensures lexical order
-		sort.Sort(dirEntries(contents))
+		// sort the entries, ensures lexical order
+		sort.Sort(dirEntries(entries))
 
-		for _, fi := range contents {
-			// don't recursively read contents
-			if fi.IsDir() {
+		for _, entry := range entries {
+			// don't recursively read entries
+			if entry.IsDir() {
 				continue
 			}
 
 			// if it's not a json file, ignore it
-			if !strings.HasSuffix(fi.Name(), ".json") {
+			if !strings.HasSuffix(entry.Name(), ".json") {
 				continue
 			}
 
-			groups, err := NewChannelGroups(file, fi.Name())
+			groups, err := NewChannelGroups(file, entry.Name())
 			if err != nil {
 				return err // already formatted
 			}
