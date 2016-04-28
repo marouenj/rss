@@ -50,6 +50,10 @@ func NewChannelGroups(dir, fileName string) (*ChannelGroups, error) {
 // group by owner
 // owners are assumed to be sorted
 func (cg *ChannelGroups) mergeOwners() error {
+	if len(*cg) < 2 {
+		return nil
+	}
+
 	curr := 0
 	for idx, _ := range (*cg)[1:] {
 		if strings.Compare((*cg)[idx].Owner, (*cg)[idx+1].Owner) > 0 { // check is sorted
@@ -103,7 +107,9 @@ type Loader struct {
 }
 
 func NewLoader() (*Loader, error) {
-	return &Loader{}, nil
+	return &Loader{
+		ChannelGroups: ChannelGroups{},
+	}, nil
 }
 
 func (l *Loader) Load(file string) error {
