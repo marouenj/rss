@@ -66,8 +66,12 @@ func main() {
 
 	// check outDir exists
 	if _, err := os.Stat(outDir); err != nil {
-		fmt.Printf("[ERR] Output dir not exists: %v\n", err)
-		os.Exit(1)
+		// create if not exists
+		err = os.Mkdir(outDir, os.ModeDir|os.ModePerm)
+		if err != nil {
+			fmt.Printf("[ERR] Unable to create dir '%s': %v\n", outDir, err)
+			os.Exit(1)
+		}
 	}
 
 	// check outDir is a dir
