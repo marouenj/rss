@@ -61,16 +61,20 @@ type Crawler struct {
 }
 
 func NewCrawler() (*Crawler, error) {
-	return &Crawler{}, nil
+	return &Crawler{
+		Rss: Rss{
+			Channels: Channels{},
+		},
+	}, nil
 }
 
 func (c *Crawler) Crawl(loader *Loader) error {
 	if loader == nil {
-		return fmt.Errorf("[ERR] 'loader' is null")
+		return fmt.Errorf("[ERR] 'loader' is nil")
 	}
 
 	if loader.ChannelGroups == nil {
-		return fmt.Errorf("[ERR] 'loader' not contains links")
+		return fmt.Errorf("[ERR] 'loader->ChannelGroups' is nil")
 	}
 
 	for _, group := range loader.ChannelGroups {
