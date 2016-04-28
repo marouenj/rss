@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/marouenj/rss/agent"
 )
 
 var (
@@ -78,6 +80,55 @@ func main() {
 	info, _ = os.Stat(outDir)
 	if !info.IsDir() {
 		fmt.Printf("[ERR] Output dir not a dir\n")
+		os.Exit(1)
+	}
+
+	// create loader
+	loader, err := agent.NewLoader()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+
+	// load
+	err = loader.Load(inDir)
+	if err != nil {
+		fmt.Printf("[ERR] Unable to load channels: %v\n", err)
+		os.Exit(1)
+	}
+
+	// create crawler
+	crawler, err := agent.NewCrawler()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+
+	// crawl
+	err = crawler.Crawl(loader)
+	if err != nil {
+		fmt.Printf("[ERR] Unable to download items: %v\n", err)
+		os.Exit(1)
+	}
+
+	// create marshaller
+	marshaller, err := agent.NewMarshaller(outDir)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+
+	// rearrange items
+	err = marshaller.ReArrange(crawler.Rss.Channels)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+
+	// persist
+	err = marshaller.Save()
+	if err != nil {
+		fmt.Printf("[ERR] Unable to merge and persist new items: %v\n", err)
 		os.Exit(1)
 	}
 }
